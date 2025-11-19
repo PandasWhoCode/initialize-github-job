@@ -44,7 +44,7 @@ jobs:
           java-distribution: 'temurin'
           java-version: '25'
           setup-gradle: true
-          gradle-version: '9'
+          gradle-version: '9.2'
           setup-node: true
           node-version: '24'
           setup-python: true
@@ -182,7 +182,7 @@ jobs:
         id: test-setup-gradle
         with:
           setup-gradle: true
-          gradle-version: '9'
+          gradle-version: '9.2'
 
       - name: Verify Gradle Outputs
         run: |
