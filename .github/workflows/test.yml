@@ -1,0 +1,124 @@
+name: Test Action
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test-basic-checkout:
+    name: Test Basic Checkout
+    runs-on: ubuntu-latest
+    steps:
+      - name: Initialize job
+        uses: ./
+      
+      - name: Verify checkout
+        run: |
+          echo "Current directory: $(pwd)"
+          echo "Files in repo:"
+          ls -la
+
+  test-node:
+    name: Test Node.js Setup
+    runs-on: ubuntu-latest
+    steps:
+      - name: Initialize job with Node.js
+        uses: ./
+        with:
+          setup-node: 'true'
+          node-version: '20'
+          node-cache: 'npm'
+      
+      - name: Verify Node.js
+        run: |
+          node --version
+          npm --version
+
+  test-python:
+    name: Test Python Setup
+    runs-on: ubuntu-latest
+    steps:
+      - name: Initialize job with Python
+        uses: ./
+        with:
+          setup-python: 'true'
+          python-version: '3.11'
+      
+      - name: Verify Python
+        run: |
+          python --version
+          pip --version
+
+  test-java:
+    name: Test Java Setup
+    runs-on: ubuntu-latest
+    steps:
+      - name: Initialize job with Java
+        uses: ./
+        with:
+          setup-java: 'true'
+          java-version: '17'
+          java-distribution: 'temurin'
+      
+      - name: Verify Java
+        run: |
+          java -version
+          javac -version
+
+  test-go:
+    name: Test Go Setup
+    runs-on: ubuntu-latest
+    steps:
+      - name: Initialize job with Go
+        uses: ./
+        with:
+          setup-go: 'true'
+          go-version: '1.21'
+      
+      - name: Verify Go
+        run: |
+          go version
+
+  test-multi-language:
+    name: Test Multi-Language Setup
+    runs-on: ubuntu-latest
+    steps:
+      - name: Initialize job with multiple languages
+        uses: ./
+        with:
+          setup-node: 'true'
+          node-version: '20'
+          setup-python: 'true'
+          python-version: '3.11'
+      
+      - name: Verify all languages
+        run: |
+          echo "Node version: $(node --version)"
+          echo "npm version: $(npm --version)"
+          echo "Python version: $(python --version)"
+          echo "pip version: $(pip --version)"
+
+  test-no-checkout:
+    name: Test Without Checkout
+    runs-on: ubuntu-latest
+    steps:
+      - name: Manual checkout
+        uses: actions/checkout@v4
+      
+      - name: Initialize job without checkout
+        uses: ./
+        with:
+          checkout: 'false'
+          setup-node: 'true'
+          node-version: '20'
+      
+      - name: Verify setup
+        run: |
+          node --version
+          ls -la

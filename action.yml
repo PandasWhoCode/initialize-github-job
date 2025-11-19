@@ -1,0 +1,112 @@
+name: 'Initialize GitHub Job'
+description: 'Common steps for initializing a job for GitHub actions'
+author: 'PandasWhoCode'
+
+inputs:
+  checkout:
+    description: 'Whether to checkout the repository'
+    required: false
+    default: 'true'
+  checkout-ref:
+    description: 'The branch, tag or SHA to checkout'
+    required: false
+    default: ''
+  checkout-token:
+    description: 'Personal access token (PAT) used to fetch the repository'
+    required: false
+    default: ${{ github.token }}
+  setup-node:
+    description: 'Whether to setup Node.js'
+    required: false
+    default: 'false'
+  node-version:
+    description: 'Node.js version to use'
+    required: false
+    default: '20'
+  node-version-file:
+    description: 'File containing the Node.js version (e.g., .nvmrc, .node-version)'
+    required: false
+    default: ''
+  node-cache:
+    description: 'Used to specify a package manager for caching (npm, yarn, pnpm)'
+    required: false
+    default: ''
+  setup-python:
+    description: 'Whether to setup Python'
+    required: false
+    default: 'false'
+  python-version:
+    description: 'Python version to use'
+    required: false
+    default: '3.x'
+  python-cache:
+    description: 'Used to specify a package manager for caching (pip, pipenv, poetry)'
+    required: false
+    default: ''
+  setup-java:
+    description: 'Whether to setup Java'
+    required: false
+    default: 'false'
+  java-version:
+    description: 'Java version to use'
+    required: false
+    default: '17'
+  java-distribution:
+    description: 'Java distribution (temurin, zulu, adopt, etc.)'
+    required: false
+    default: 'temurin'
+  setup-go:
+    description: 'Whether to setup Go'
+    required: false
+    default: 'false'
+  go-version:
+    description: 'Go version to use'
+    required: false
+    default: 'stable'
+  go-cache:
+    description: 'Whether to cache Go modules'
+    required: false
+    default: 'true'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Checkout repository
+      if: inputs.checkout == 'true'
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ inputs.checkout-ref }}
+        token: ${{ inputs.checkout-token }}
+
+    - name: Setup Node.js
+      if: inputs.setup-node == 'true'
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version-file != '' && '' || inputs.node-version }}
+        node-version-file: ${{ inputs.node-version-file }}
+        cache: ${{ inputs.node-cache }}
+
+    - name: Setup Python
+      if: inputs.setup-python == 'true'
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+        cache: ${{ inputs.python-cache }}
+
+    - name: Setup Java
+      if: inputs.setup-java == 'true'
+      uses: actions/setup-java@v4
+      with:
+        java-version: ${{ inputs.java-version }}
+        distribution: ${{ inputs.java-distribution }}
+
+    - name: Setup Go
+      if: inputs.setup-go == 'true'
+      uses: actions/setup-go@v5
+      with:
+        go-version: ${{ inputs.go-version }}
+        cache: ${{ inputs.go-cache }}
+
+branding:
+  icon: 'play'
+  color: 'blue'
