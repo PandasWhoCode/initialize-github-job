@@ -15,6 +15,7 @@ inputs:
   checkout-fetch-depth:
     description: 'Depth of commit history to fetch'
     required: false
+    default: '0'
   setup-node:
     description: 'Whether to setup Node.js'
     required: false
