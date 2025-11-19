@@ -69,7 +69,6 @@ inputs:
   setup-go:
     description: 'Whether to setup Go'
     required: false
-    default: 'true'
   go-version:
     description: 'Go version to use'
     required: false
