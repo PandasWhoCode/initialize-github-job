@@ -34,15 +34,6 @@ Common steps for initializing a job for GitHub actions. This composite action co
 | checkout-token       | Personal access token (PAT) used to fetch the repository | No       | -       |
 | checkout-fetch-depth | Depth of commit history to fetch                         | No       | 0       |
 
-**Node.js**
-
-| Input             | Description                                     | Required | Default |
-|-------------------|-------------------------------------------------|----------|---------|
-| setup-node        | Whether to setup Node.js                        | No       | -       |
-| node-version      | Node.js version to use                          | No       | -       |
-| node-cache        | Package manager for caching (npm, yarn, pnpm)   | No       | -       |
-| node-check-latest | Whether to check for the latest Node.js version | No       | -       |
-
 **Java**
 
 | Input             | Description                                               | Required | Default |
@@ -61,6 +52,15 @@ Common steps for initializing a job for GitHub actions. This composite action co
 | gradle-cache-disabled  | Whether to disable Gradle caching                                                          | No       | false   |
 | gradle-cache-read-only | Whether to use read-only caching for Gradle                                                | No       | -       |
 | cache-write-only       | When true, entries will not be restored from cache but will be saved at the end of the Job | No       | false   |
+
+**Node.js**
+
+| Input             | Description                                     | Required | Default |
+|-------------------|-------------------------------------------------|----------|---------|
+| setup-node        | Whether to setup Node.js                        | No       | -       |
+| node-version      | Node.js version to use                          | No       | -       |
+| node-cache        | Package manager for caching (npm, yarn, pnpm)   | No       | -       |
+| node-check-latest | Whether to check for the latest Node.js version | No       | -       |
 
 **Python**
 
@@ -128,7 +128,6 @@ Common steps for initializing a job for GitHub actions. This composite action co
 - `python-version`: The installed Python or PyPy version
 - `python-cache-hit`: Boolean indicating if cache was hit
 - `python-path`: The absolute path to the Python or PyPy executable
-
 
 **Go Outputs**
 
