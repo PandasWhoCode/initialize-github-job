@@ -66,7 +66,7 @@ inputs:
   python-cache:
     description: 'Used to specify a package manager for caching (pip, pipenv, poetry)'
     required: false
-    default: 'false'
+
   setup-go:
     description: 'Whether to setup Go'
     required: false
@@ -162,10 +162,10 @@ outputs:
     value: ${{ steps.setup-go.outputs.cache-hit }}
   rust-cachekey:
     description: 'A short hash of the rustc version, appropriate for use as a cache key. "20220627a831"'
-    value: ${{steps.setup-rust.outputs.cachekey}}
+    value: ${{ steps.setup-rust.outputs.cachekey }}
   rust-name:
     description: 'Rustup's name for the selected version of the toolchain. "1.62.0"'
-    value: ${{steps.setup-rust.outputs.name}}
+    value: ${{ steps.setup-rust.outputs.name }}
   swift-version:
     description: 'The actual Swift version that was configured.'
     value: ${{ steps.setup-swift.outputs.swift-version }}
@@ -188,7 +188,7 @@ runs:
 
     - name: Checkout Code
       id: checkout-code
-      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
       if: ${{ inputs.checkout == 'true' }}
       with:
         fetch-depth: ${{ inputs.checkout-fetch-depth }}
@@ -202,6 +202,7 @@ runs:
       with:
         distribution: ${{ inputs.java-distribution }}
         java-version: ${{ inputs.java-version }}
+        cache: ${{ inputs.java-cache }}
 
     - name: Setup Gradle
       id: setup-gradle
@@ -237,6 +238,7 @@ runs:
       with:
         go-version: ${{ inputs.go-version }}
         cache: ${{ inputs.go-cache }}
+        architecture: ${{ inputs.go-architecture }}
 
     - name: Setup Rust
       id: setup-rust
