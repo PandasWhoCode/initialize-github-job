@@ -129,6 +129,7 @@ jobs:
           checkout: true
           checkout-fetch-depth: 0
           checkout-ref: main
+          checkout-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Verify Checkout Outputs
         run: |
