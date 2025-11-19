@@ -2,123 +2,251 @@ name: Test Action
 
 on:
   push:
-    branches: [ main, develop ]
+    branches:
+    - main
   pull_request:
-    branches: [ main ]
-  workflow_dispatch:
-
+    types:
+      - converted_to_draft
+      - ready_for_review
+      - synchronize
+      - opened
+      - reopened
 permissions:
   contents: read
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
-  test-basic-checkout:
-    name: Test Basic Checkout
-    runs-on: ubuntu-latest
+  test-all:
+    name: Test Action on ${{ matrix.os }} with ${{ matrix.language }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
-      - name: Initialize job
-        uses: ./
-      
-      - name: Verify checkout
-        run: |
-          echo "Current directory: $(pwd)"
-          echo "Files in repo:"
-          ls -la
+      - name: Checkout Repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-  test-node:
-    name: Test Node.js Setup
-    runs-on: ubuntu-latest
-    steps:
-      - name: Initialize job with Node.js
+      - name: Run Action
         uses: ./
+        id: test-all
         with:
-          setup-node: 'true'
-          node-version: '20'
-          node-cache: 'npm'
-      
-      - name: Verify Node.js
-        run: |
-          node --version
-          npm --version
+          checkout: true
+          checkout-fetch-depth: 0
+          checkout-ref: main
+          setup-java: true
+          java-distribution: 'temurin'
+          java-version: '17'
+          setup-gradle: true
+          gradle-version: '7.5'
+          setup-node: true
+          node-version: '18'
+          setup-python: true
+          python-version: '3.9'
+          setup-go: true
+          go-version: '1.20'
+          setup-rust: true
+          rust-version: '1.70.0'
+          setup-swift: true
+          swift-version: '5.7'
 
-  test-python:
-    name: Test Python Setup
+      - name: Verify Setup
+        run: |
+          echo "::group::Verify Checkout Outputs"
+            echo "Checkout Ref: ${{ steps.test-all.outputs.checkout-ref }}"
+            echo "Checkout Commit: ${{ steps.test-all.outputs.checkout-commit }}"
+          echo "::group::Verify Java Outputs"
+            echo "Java Distribution: ${{ steps.test-all.outputs.java-distribution }}"
+            echo "Java Version: ${{ steps.test-all.outputs.java-version }}"
+            echo "Java Path: ${{ steps.test-all.outputs.java-path }}"
+            echo "Java Cache Hit: ${{ steps.test-all.outputs.java-cache-hit }}"
+            java -version
+          echo "::endgroup::"
+          echo "::group::Verify Gradle Outputs"
+            echo "Gradle Version: ${{ steps.test-all.outputs.gradle-version }}"
+            echo "Gradle Build Scan URL: ${{ steps.test-all.outputs.gradle-build-scan-url }}"
+            echo "Gradle Dependency Graph File: ${{ steps.test-all.outputs.gradle-dependency-graph-file }}"
+            gradle -v
+          echo "::endgroup::"
+          echo "::group::Verify Node.js Outputs"
+            echo "Node.js Version: ${{ steps.test-all.outputs.node-version }}"
+            echo "Node.js Cache Hit: ${{ steps.test-all.outputs.node-cache-hit }}"
+            node -v
+            npm -v
+          echo "::endgroup::"
+          echo "::group::Verify Python Outputs"
+            echo "Python Version: ${{ steps.test-all.outputs.python-version }}"
+            echo "Python Path: ${{ steps.test-all.outputs.python-path }}"
+            echo "Python Cache Hit: ${{ steps.test-all.outputs.python-cache-hit }}"
+            python --version
+            pip --version
+          echo "::endgroup::"
+          echo "::group::Verify Go Outputs"
+            echo "Go Version: ${{ steps.test-all.outputs.go-version }}"
+            echo "Go Cache Hit: ${{ steps.test-all.outputs.go-cache-hit }}"
+            go version
+          echo "::endgroup::"
+          echo "::group::Verify Rust Outputs"
+            echo "Rust Name: ${{ steps.test-all.outputs.rust-name }}"
+            echo "Rust Cache Key: ${{ steps.test-all.outputs.rust-cachekey }}"
+            rustc --version
+            cargo --version
+          echo "::endgroup::"
+          echo "::group::Verify Swift Outputs"
+            echo "Swift Version: ${{ steps.test-all.outputs.swift-version }}"
+            echo "Swift Toolchain: ${{ steps.test-all.outputs.swift-toolchain }}"
+            echo "Swift SDKs: ${{ steps.test-all.outputs.swift-sdks }}"
+            swift --version
+          echo "::endgroup::"
+
+  test-checkout:
+    name: Test Checkout Action
     runs-on: ubuntu-latest
     steps:
-      - name: Initialize job with Python
+      - name: Checkout Repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Run Checkout Action
         uses: ./
+        id: test-checkout
         with:
-          setup-python: 'true'
-          python-version: '3.11'
-      
-      - name: Verify Python
+          checkout: true
+          checkout-fetch-depth: 0
+          checkout-ref: main
+
+      - name: Verify Checkout Outputs
         run: |
+          echo "Checkout Ref: ${{ steps.test-checkout.outputs.checkout-ref }}"
+          echo "Checkout Commit: ${{ steps.test-checkout.outputs.checkout-commit }}"
+          git_value=$(git log -1 --oneline)
+          echo "Git Commit: ${git_value}"
+
+  test-setup-java:
+    name: Test Setup Java Action
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run Setup Java Action
+        uses: ./
+        id: test-setup-java
+        with:
+          setup-java: true
+          java-distribution: 'temurin'
+          java-version: '17'
+
+      - name: Verify Java Outputs
+        run: |
+          echo "Java Distribution: ${{ steps.test-setup-java.outputs.java-distribution }}"
+          echo "Java Version: ${{ steps.test-setup-java.outputs.java-version }}"
+          echo "Java Path: ${{ steps.test-setup-java.outputs.java-path }}"
+          echo "Java Cache Hit: ${{ steps.test-setup-java.outputs.java-cache-hit }}"
+          java -version
+
+  test-setup-gradle:
+    name: Test Setup Gradle Action
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run Setup Gradle Action
+        uses: ./
+        id: test-setup-gradle
+        with:
+          setup-gradle: true
+          gradle-version: '7.5'
+
+      - name: Verify Gradle Outputs
+        run: |
+          echo "Gradle Version: ${{ steps.test-setup-gradle.outputs.gradle-version }}"
+          echo "Gradle Build Scan URL: ${{ steps.test-setup-gradle.outputs.gradle-build-scan-url }}"
+          echo "Gradle Dependency Graph File: ${{ steps.test-setup-gradle.outputs.gradle-dependency-graph-file }}"
+          gradle -v
+
+  test-setup-node:
+    name: Test Setup Node.js Action
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run Setup Node.js Action
+        uses: ./
+        id: test-setup-node
+        with:
+          setup-node: true
+          node-version: '18'
+
+      - name: Verify Node.js Outputs
+        run: |
+          echo "Node.js Version: ${{ steps.test-setup-node.outputs.node-version }}"
+          echo "Node.js Cache Hit: ${{ steps.test-setup-node.outputs.node-cache-hit }}"
+          node -v
+          npm -v
+
+  test-setup-python:
+    name: Test Setup Python Action
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run Setup Python Action
+        uses: ./
+        id: test-setup-python
+        with:
+            setup-python: true
+            python-version: '3.13'
+
+      - name: Verify Python Outputs
+        run: |
+          echo "Python Version: ${{ steps.test-setup-python.outputs.python-version }}"
+          echo "Python Path: ${{ steps.test-setup-python.outputs.python-path }}"
+          echo "Python Cache Hit: ${{ steps.test-setup-python.outputs.python-cache-hit }}"
           python --version
           pip --version
 
-  test-java:
-    name: Test Java Setup
+  test-setup-go:
+    name: Test Setup Go Action
     runs-on: ubuntu-latest
     steps:
-      - name: Initialize job with Java
+      - name: Run Setup Go Action
         uses: ./
+        id: test-setup-go
         with:
-          setup-java: 'true'
-          java-version: '17'
-          java-distribution: 'temurin'
-      
-      - name: Verify Java
-        run: |
-          java -version
-          javac -version
+          setup-go: true
+          go-version: '1.20'
 
-  test-go:
-    name: Test Go Setup
-    runs-on: ubuntu-latest
-    steps:
-      - name: Initialize job with Go
-        uses: ./
-        with:
-          setup-go: 'true'
-          go-version: '1.21'
-      
-      - name: Verify Go
+      - name: Verify Go Outputs
         run: |
+          echo "Go Version: ${{ steps.test-setup-go.outputs.go-version }}"
+          echo "Go Cache Hit: ${{ steps.test-setup-go.outputs.go-cache-hit }}"
           go version
 
-  test-multi-language:
-    name: Test Multi-Language Setup
+  test-setup-rust:
+    name: Test Setup Rust Action
     runs-on: ubuntu-latest
     steps:
-      - name: Initialize job with multiple languages
+      - name: Run Setup Rust Action
         uses: ./
+        id: test-setup-rust
         with:
-          setup-node: 'true'
-          node-version: '20'
-          setup-python: 'true'
-          python-version: '3.11'
-      
-      - name: Verify all languages
-        run: |
-          echo "Node version: $(node --version)"
-          echo "npm version: $(npm --version)"
-          echo "Python version: $(python --version)"
-          echo "pip version: $(pip --version)"
+          setup-rust: true
+          rust-version: '1.70.0'
 
-  test-no-checkout:
-    name: Test Without Checkout
-    runs-on: ubuntu-latest
-    steps:
-      - name: Manual checkout
-        uses: actions/checkout@v4
-      
-      - name: Initialize job without checkout
-        uses: ./
-        with:
-          checkout: 'false'
-          setup-node: 'true'
-          node-version: '20'
-      
-      - name: Verify setup
+      - name: Verify Rust Outputs
         run: |
-          node --version
-          ls -la
+          echo "Rust Name: ${{ steps.test-setup-rust.outputs.rust-name }}"
+          echo "Rust Cache Key: ${{ steps.test-setup-rust.outputs.rust-cachekey }}"
+          rustc --version
+          cargo --version
+
+  test-setup-swift:
+    name: Test Setup Swift Action
+    runs-on: macos-latest
+    steps:
+      - name: Run Setup Swift Action
+        uses: ./
+        id: test-setup-swift
+        with:
+          setup-swift: true
+          swift-version: '5.7'
+
+      - name: Verify Swift Outputs
+        run: |
+          echo "Swift Version: ${{ steps.test-setup-swift.outputs.swift-version }}"
+          echo "Swift Toolchain: ${{ steps.test-setup-swift.outputs.swift-toolchain }}"
+          echo "Swift SDKs: ${{ steps.test-setup-swift.outputs.swift-sdks }}"
+          swift --version
