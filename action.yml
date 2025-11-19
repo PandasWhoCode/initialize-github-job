@@ -6,107 +6,347 @@ inputs:
   checkout:
     description: 'Whether to checkout the repository'
     required: false
-    default: 'true'
   checkout-ref:
     description: 'The branch, tag or SHA to checkout'
     required: false
-    default: ''
   checkout-token:
     description: 'Personal access token (PAT) used to fetch the repository'
     required: false
-    default: ${{ github.token }}
+  checkout-fetch-depth:
+    description: 'Depth of commit history to fetch'
+    required: false
+    default: '0'
   setup-node:
     description: 'Whether to setup Node.js'
     required: false
-    default: 'false'
   node-version:
     description: 'Node.js version to use'
     required: false
-    default: '20'
-  node-version-file:
-    description: 'File containing the Node.js version (e.g., .nvmrc, .node-version)'
-    required: false
-    default: ''
   node-cache:
     description: 'Used to specify a package manager for caching (npm, yarn, pnpm)'
     required: false
-    default: ''
-  setup-python:
-    description: 'Whether to setup Python'
+  node-check-latest:
+    description: 'Whether to check for the latest Node.js version'
     required: false
-    default: 'false'
-  python-version:
-    description: 'Python version to use'
-    required: false
-    default: '3.x'
-  python-cache:
-    description: 'Used to specify a package manager for caching (pip, pipenv, poetry)'
-    required: false
-    default: ''
   setup-java:
     description: 'Whether to setup Java'
     required: false
-    default: 'false'
   java-version:
     description: 'Java version to use'
     required: false
-    default: '17'
   java-distribution:
     description: 'Java distribution (temurin, zulu, adopt, etc.)'
     required: false
-    default: 'temurin'
+  java-cache:
+    description: 'Name of the build platform to cache dependencies. It can be "maven", "gradle" or "sbt".'
+    required: false
+  setup-gradle:
+    description: 'Whether to setup Gradle'
+    required: false
+  gradle-version:
+    description: 'Gradle version to use. If specified, this Gradle version will be downloaded, added to the PATH and used for invoking Gradle.'
+    required: false
+    default: 'wrapper'
+  gradle-cache-disabled:
+    description: 'Whether to disable Gradle caching'
+    required: false
+    default: 'false'
+  gradle-cache-read-only:
+    description: 'Whether to use read-only caching for Gradle'
+    required: false
+  cache-write-only:
+    description: 'When true, entries will not be restored from the cache but will be saved at the end of the Job.'
+    required: false
+    default: 'false'
+  setup-python:
+    description: 'Whether to setup Python'
+    required: false
+  python-version:
+    description: 'Python version to use'
+    required: false
+  python-cache:
+    description: 'Used to specify a package manager for caching (pip, pipenv, poetry)'
+    required: false
   setup-go:
     description: 'Whether to setup Go'
     required: false
-    default: 'false'
   go-version:
     description: 'Go version to use'
     required: false
-    default: 'stable'
   go-cache:
     description: 'Whether to cache Go modules'
     required: false
     default: 'true'
+  go-architecture:
+    description: 'Target architecture for Go to use. Examples: x86, x64. Will use system architecture by default.'
+    required: false
+  setup-rust:
+    description: 'Whether to setup Rust'
+    required: false
+  rust-version:
+    description: 'Rust version to use'
+    required: false
+  rust-targets:
+    description: 'Comma-separated list of target triples to install for this toolchain'
+    required: false
+  rust-components:
+    description: 'Comma-separated list of components to be additionally installed'
+    required: false
+  setup-swift:
+    description: 'Whether to setup Swift'
+    required: false
+  swift-version:
+    description: 'Swift version to use'
+    required: false
+  swift-cache:
+    description: 'Whether to cache downloaded toolchain snapshots. Enabled by default, can be disabled in case of storage constraints.'
+    required: false
+    default: 'true'
+  swift-prefer-oss-toolchain:
+    description: 'Whether to prefer installing Swift open source toolchain over using Xcode integrated toolchain.'
+    required: false
+    default: 'false'
+  swift-sdks:
+    description: 'Semi-colon separated list of Swift SDKs to install along with the main toolchain.'
+    required: false
+
+# expose outputs from the sub-actions
+outputs:
+  checkout-ref:
+    description: 'The branch, tag or SHA that was checked out'
+    value: ${{ steps.checkout-code.outputs.ref }}
+  checkout-commit:
+    description: 'The commit SHA that was checked out'
+    value: ${{ steps.checkout-code.outputs.commit }}
+  java-distribution:
+    description: 'Distribution of Java that has been installed'
+    value: ${{ steps.setup-java.outputs.distribution }}
+  java-version:
+    description: 'Actual version of the java environment that has been installed'
+    value: ${{ steps.setup-java.outputs.version }}
+  java-path:
+    description: 'Path to where the java environment has been installed (same as $JAVA_HOME)'
+    value: ${{ steps.setup-java.outputs.path }}
+  java-cache-hit:
+    description: 'A boolean value to indicate an exact match was found for the primary key'
+    value: ${{ steps.setup-java.outputs.cache-hit }}
+  gradle-build-scan-url:
+    description: 'Link to the Build Scan® generated by a Gradle build. Note that this output applies to a Step executing Gradle, not to the `setup-gradle` Step itself.'
+    value: ${{ steps.setup-gradle.outputs.build-scan-url }}
+  gradle-dependency-graph-file:
+    description: 'Path to the GitHub Dependency Graph snapshot file generated by a Gradle build. Note that this output applies to a Step executing Gradle, not to the `setup-gradle` Step itself.'
+    value: ${{ steps.setup-gradle.outputs.dependency-graph-file }}
+  gradle-version:
+    description: 'Version of Gradle that was setup by the action'
+    value: ${{ steps.setup-gradle.outputs.gradle-version }}
+  node-cache-hit:
+    description: 'A boolean value to indicate if a cache was hit.'
+    value: ${{ steps.setup-node.outputs.cache-hit }}
+  node-version:
+    description: 'The installed node version.'
+    value: ${{ steps.setup-node.outputs.node-version }}
+  python-version:
+    description: "The installed Python or PyPy version. Useful when given a version range as input."
+    value: ${{ steps.setup-python.outputs.python-version }}
+  python-cache-hit:
+    description: "A boolean value to indicate a cache entry was found"
+    value: ${{ steps.setup-python.outputs.cache-hit }}
+  python-path:
+    description: "The absolute path to the Python or PyPy executable."
+    value: ${{ steps.setup-python.outputs.python-path }}
+  go-version:
+    description: 'The installed Go version. Useful when given a version range as input.'
+    value: ${{ steps.setup-go.outputs.go-version }}
+  go-cache-hit:
+    description: 'A boolean value to indicate if a cache was hit'
+    value: ${{ steps.setup-go.outputs.cache-hit }}
+  rust-cachekey:
+    description: 'A short hash of the rustc version, appropriate for use as a cache key. "20220627a831"'
+    value: ${{ steps.setup-rust.outputs.cachekey }}
+  rust-name:
+    description: 'Rustups name for the selected version of the toolchain. "1.62.0"'
+    value: ${{ steps.setup-rust.outputs.name }}
+  swift-version:
+    description: 'The actual Swift version that was configured.'
+    value: ${{ steps.setup-swift.outputs.swift-version }}
+  swift-toolchain:
+    description: 'JSON formatted toolchain snapshot metadata that was configured.'
+    value: ${{ steps.setup-swift.outputs.toolchain }}
+  swift-sdks:
+    description: 'JSON formatted SDK snapshots metadata that were configured.'
+    value: ${{ steps.setup-swift.outputs.sdks }}
 
 runs:
   using: 'composite'
   steps:
-    - name: Checkout repository
-      if: inputs.checkout == 'true'
-      uses: actions/checkout@v4
+    # Always perform Harden Runner step
+    - name: Harden Runner
+      id: harden-runner
+      uses: step-security/harden-runner@ec9f2d5744a09debf3a187a3f4f675c53b671911 # v2.13.0
       with:
+        egress-policy: audit
+
+    - name: Checkout Code Parameters
+      id: checkout-params
+      if: ${{ inputs.checkout == 'true' }}
+      shell: bash
+      run: |
+        echo "::group::Checkout Code Parameters"
+        echo "Ref: ${{ inputs.checkout-ref }}"
+        echo "Fetch Depth: ${{ inputs.checkout-fetch-depth }}"
+        echo "::endgroup::"
+
+    - name: Checkout Code
+      id: checkout-code
+      uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+      if: ${{ inputs.checkout == 'true' }}
+      with:
+        fetch-depth: ${{ inputs.checkout-fetch-depth }}
         ref: ${{ inputs.checkout-ref }}
         token: ${{ inputs.checkout-token }}
 
-    - name: Setup Node.js
-      if: inputs.setup-node == 'true'
-      uses: actions/setup-node@v4
+    - name: Set Up Java Parameters
+      id: setup-java-params
+      if: ${{ inputs.setup-java == 'true' }}
+      shell: bash
+      run: |
+        echo "::group::Setting up Java."
+        echo "Version: ${{ inputs.java-version }}"
+        echo "Distribution: ${{ inputs.java-distribution }}"
+        echo "Cache: ${{ inputs.java-cache }}"
+        echo "::endgroup::"
+
+    - name: Setup Java
+      id: setup-java
+      if: ${{ inputs.setup-java == 'true' }}
+      uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
       with:
-        node-version: ${{ inputs.node-version-file != '' && '' || inputs.node-version }}
-        node-version-file: ${{ inputs.node-version-file }}
+        distribution: ${{ inputs.java-distribution }}
+        java-version: ${{ inputs.java-version }}
+        cache: ${{ inputs.java-cache }}
+
+    - name: Set Up Gradle Parameters
+      id: setup-gradle-params
+      if: ${{ inputs.setup-gradle == 'true' }}
+      shell: bash
+      run: |
+        echo "::group::Setting up Gradle."
+        echo "Version: ${{ inputs.gradle-version }}"
+        echo "Cache Disabled: ${{ inputs.gradle-cache-disabled }}"
+        echo "Cache Read Only: ${{ inputs.gradle-cache-read-only }}"
+        echo "Cache Write Only: ${{ inputs.cache-write-only }}"
+        echo "::endgroup::"
+
+    - name: Setup Gradle
+      id: setup-gradle
+      if: ${{ inputs.setup-gradle == 'true' }}
+      uses: gradle/actions/setup-gradle@ac638b010cf58a27ee6c972d7336334ccaf61c96 # v4.4.1
+      with:
+        cache-read-only: ${{ inputs.gradle-cache-read-only == 'true' }}
+        cache-write-only: ${{ inputs.cache-write-only == 'true' }}
+        cache-disabled: ${{ inputs.gradle-cache-disabled == 'true' }}
+        gradle-version: ${{ inputs.gradle-version }}
+
+    - name: Set Up NodeJS Parameters
+      id: setup-node-params
+      if: ${{ inputs.setup-node == 'true' }}
+      shell: bash
+      run: |
+        echo "::group::Setting up NodeJS."
+        echo "Version: ${{ inputs.node-version }}"
+        echo "Cache: ${{ inputs.node-cache }}"
+        echo "Check Latest: ${{ inputs.node-check-latest }}"
+        echo "::endgroup::"
+
+    - name: Setup NodeJS
+      id: setup-node
+      if: ${{ inputs.setup-node == 'true' }}
+      uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+      with:
+        node-version: ${{ inputs.node-version }}
         cache: ${{ inputs.node-cache }}
+        check-latest: ${{ inputs.node-check-latest == 'true' }}
+
+    - name: Set Up Python Parameters
+      id: setup-python-params
+      if: ${{ inputs.setup-python == 'true' }}
+      shell: bash
+      run: |
+        echo "::group::Setting up Python."
+        echo "Version: ${{ inputs.python-version }}"
+        echo "Cache: ${{ inputs.python-cache }}"
+        echo "::endgroup::"
 
     - name: Setup Python
-      if: inputs.setup-python == 'true'
-      uses: actions/setup-python@v5
+      id: setup-python
+      if: ${{ inputs.setup-python == 'true' }}
+      uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c # v6.0.0
       with:
         python-version: ${{ inputs.python-version }}
         cache: ${{ inputs.python-cache }}
 
-    - name: Setup Java
-      if: inputs.setup-java == 'true'
-      uses: actions/setup-java@v4
-      with:
-        java-version: ${{ inputs.java-version }}
-        distribution: ${{ inputs.java-distribution }}
+    - name: Set Up Go Parameters
+      id: setup-go-params
+      if: ${{ inputs.setup-go == 'true' }}
+      shell: bash
+      run: |
+        echo "::group::Setting up Go."
+        echo "Version: ${{ inputs.go-version }}"
+        echo "Cache: ${{ inputs.go-cache }}"
+        echo "Architecture: ${{ inputs.go-architecture }}"
+        echo "::endgroup::"
 
     - name: Setup Go
-      if: inputs.setup-go == 'true'
-      uses: actions/setup-go@v5
+      id: setup-go
+      if: ${{ inputs.setup-go == 'true' }}
+      uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6.0.0
       with:
         go-version: ${{ inputs.go-version }}
-        cache: ${{ inputs.go-cache }}
+        cache: ${{ inputs.go-cache == 'true' }}
+        architecture: ${{ inputs.go-architecture }}
+
+    - name: Set Up Rust Parameters
+      id: setup-rust-params
+      if: ${{ inputs.setup-rust == 'true' }}
+      shell: bash
+      run: |
+        echo "::group::Setting up Rust."
+        echo "Version: ${{ inputs.rust-version }}"
+        echo "Targets: ${{ inputs.rust-targets }}"
+        echo "Components: ${{ inputs.rust-components }}"
+        echo "::endgroup::"
+
+    - name: Setup Rust
+      id: setup-rust
+      if: ${{ inputs.setup-rust == 'true' }}
+      uses: dtolnay/rust-toolchain@6d653acede28d24f02e3cd41383119e8b1b35921 # v1
+      with:
+        toolchain: ${{ inputs.rust-version }}
+        targets: ${{ inputs.rust-targets || '' }}
+        components: ${{ inputs.rust-components || '' }}
+
+    - name: Set Up Swift Parameters
+      id: setup-swift-params
+      if: ${{ inputs.setup-swift == 'true' }}
+      shell: bash
+      run: |
+        echo "::group::Setting up Swift."
+        echo "Version: ${{ inputs.swift-version }}"
+        echo "Cache: ${{ inputs.swift-cache }}"
+        echo "Prefer OSS Toolchain: ${{ inputs.swift-prefer-oss-toolchain }}"
+        echo "SDKs: ${{ inputs.swift-sdks }}"
+        echo "::endgroup::"
+
+    - name: Setup Swift
+      id: setup-swift
+      if: ${{ inputs.setup-swift == 'true' }}
+      uses: SwiftyLab/setup-swift@4bbb093f8c68d1dee1caa8b67c681a3f8fe70a91 # v1.12.0
+      with:
+        swift-version: ${{ inputs.swift-version }}
+        cache-snapshot: ${{ inputs.swift-cache == 'true' }}
+        prefer-oss-toolchain: ${{ inputs.swift-prefer-oss-toolchain == 'true' }}
+        sdks: ${{ inputs.swift-sdks || '' }}
 
 branding:
-  icon: 'play'
-  color: 'blue'
+  icon: 'arrow-up-right'
+  color: 'green'
