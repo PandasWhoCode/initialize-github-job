@@ -203,7 +203,7 @@ runs:
       with:
         fetch-depth: ${{ inputs.checkout-fetch-depth }}
         ref: ${{ inputs.checkout-ref }}
-        token: ${{ inputs.checkout-token || secrets.GITHUB_TOKEN }}
+        token: ${{ inputs.checkout-token }}
 
     - name: Set Up Java Parameters
       id: setup-java-params
