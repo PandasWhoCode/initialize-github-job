@@ -37,7 +37,7 @@ inputs:
     description: 'Java distribution (temurin, zulu, adopt, etc.)'
     required: false
   java-cache:
-    description: 'Whether to cache Java dependencies'
+    description: 'Name of the build platform to cache dependencies. It can be "maven", "gradle" or "sbt".'
     required: false
   setup-gradle:
     description: 'Whether to setup Gradle'
@@ -66,7 +66,6 @@ inputs:
   python-cache:
     description: 'Used to specify a package manager for caching (pip, pipenv, poetry)'
     required: false
-
   setup-go:
     description: 'Whether to setup Go'
     required: false
@@ -77,6 +76,7 @@ inputs:
   go-cache:
     description: 'Whether to cache Go modules'
     required: false
+    default: 'true'
   go-architecture:
     description: 'Target architecture for Go to use. Examples: x86, x64. Will use system architecture by default.'
     required: false
@@ -242,9 +242,9 @@ runs:
       if: ${{ inputs.setup-gradle == 'true' }}
       uses: gradle/actions/setup-gradle@ac638b010cf58a27ee6c972d7336334ccaf61c96 # v4.4.1
       with:
-        cache-read-only: ${{ inputs.gradle-cache-read-only }}
-        cache-write-only: ${{ inputs.cache-write-only }}
-        cache-disabled: ${{ inputs.gradle-cache-disabled }}
+        cache-read-only: ${{ inputs.gradle-cache-read-only == 'true' }}
+        cache-write-only: ${{ inputs.cache-write-only == 'true' }}
+        cache-disabled: ${{ inputs.gradle-cache-disabled == 'true' }}
         gradle-version: ${{ inputs.gradle-version }}
 
     - name: Set Up NodeJS Parameters
@@ -265,7 +265,7 @@ runs:
       with:
         node-version: ${{ inputs.node-version }}
         cache: ${{ inputs.node-cache }}
-        check-latest: ${{ inputs.node-check-latest }}
+        check-latest: ${{ inputs.node-check-latest == 'true' }}
 
     - name: Set Up Python Parameters
       id: setup-python-params
@@ -302,7 +302,7 @@ runs:
       uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6.0.0
       with:
         go-version: ${{ inputs.go-version }}
-        cache: ${{ inputs.go-cache }}
+        cache: ${{ inputs.go-cache == 'true' }}
         architecture: ${{ inputs.go-architecture }}
 
     - name: Set Up Rust Parameters
@@ -343,8 +343,8 @@ runs:
       uses: SwiftyLab/setup-swift@4bbb093f8c68d1dee1caa8b67c681a3f8fe70a91 # v1.12.0
       with:
         swift-version: ${{ inputs.swift-version }}
-        cache-snapshot: ${{ inputs.swift-cache }}
-        prefer-oss-toolchain: ${{ inputs.swift-prefer-oss-toolchain }}
+        cache-snapshot: ${{ inputs.swift-cache == 'true' }}
+        prefer-oss-toolchain: ${{ inputs.swift-prefer-oss-toolchain == 'true' }}
         sdks: ${{ inputs.swift-sdks || '' }}
 
 branding:
