@@ -20,7 +20,7 @@ defaults:
 
 jobs:
   test-all:
-    name: Test Action on ${{ matrix.os }}
+    name: Test All Features
     runs-on: ubuntu-latest
     steps:
       - name: Harden Runner
