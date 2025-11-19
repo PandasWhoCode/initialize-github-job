@@ -164,7 +164,7 @@ outputs:
     description: 'A short hash of the rustc version, appropriate for use as a cache key. "20220627a831"'
     value: ${{ steps.setup-rust.outputs.cachekey }}
   rust-name:
-    description: 'Rustup's name for the selected version of the toolchain. "1.62.0"'
+    description: 'Rustups name for the selected version of the toolchain. "1.62.0"'
     value: ${{ steps.setup-rust.outputs.name }}
   swift-version:
     description: 'The actual Swift version that was configured.'
