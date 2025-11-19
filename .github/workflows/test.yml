@@ -41,7 +41,8 @@ jobs:
         with:
           checkout: true
           checkout-fetch-depth: 0
-          checkout-ref: main
+          checkout-ref: 2-update-composite-action-for-real-life
+          checkout-token: ${{ secrets.GITHUB_TOKEN }}
           setup-java: true
           java-distribution: 'temurin'
           java-version: '17'
