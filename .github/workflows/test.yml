@@ -42,7 +42,7 @@ jobs:
           checkout-token: ${{ secrets.GITHUB_TOKEN }}
           setup-java: true
           java-distribution: 'temurin'
-          java-version: '17'
+          java-version: '25'
           setup-gradle: true
           gradle-version: '9'
           setup-node: true
@@ -154,7 +154,7 @@ jobs:
         with:
           setup-java: true
           java-distribution: 'temurin'
-          java-version: '17'
+          java-version: '25'
 
       - name: Verify Java Outputs
         run: |
