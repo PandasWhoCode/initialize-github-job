@@ -28,6 +28,9 @@ inputs:
   node-check-latest:
     description: 'Whether to check for the latest Node.js version'
     required: false
+  node-registry:
+    description: 'The registry URL to use for Node.js package installation and publishing'
+    required: false
   setup-java:
     description: 'Whether to setup Java'
     required: false
@@ -145,6 +148,9 @@ outputs:
   node-version:
     description: 'The installed node version.'
     value: ${{ steps.setup-node.outputs.node-version }}
+  node-registry-url:
+    description: 'The registry URL used for package installation and publishing.'
+    value: ${{ inputs.node-registry || 'https://registry.npmjs.org/' }}
   python-version:
     description: "The installed Python or PyPy version. Useful when given a version range as input."
     value: ${{ steps.setup-python.outputs.python-version }}
@@ -256,6 +262,7 @@ runs:
         echo "Version: ${{ inputs.node-version }}"
         echo "Cache: ${{ inputs.node-cache }}"
         echo "Check Latest: ${{ inputs.node-check-latest }}"
+        echo "Registry URL: ${{ inputs.node-registry || 'https://registry.npmjs.org/' }}"
         echo "::endgroup::"
 
     - name: Setup NodeJS
@@ -266,6 +273,7 @@ runs:
         node-version: ${{ inputs.node-version }}
         cache: ${{ inputs.node-cache }}
         check-latest: ${{ inputs.node-check-latest == 'true' }}
+        registry-url: ${{ inputs.node-registry || 'https://registry.npmjs.org/' }}
 
     - name: Set Up Python Parameters
       id: setup-python-params
