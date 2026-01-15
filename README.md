@@ -27,13 +27,13 @@ Common steps for initializing a job for GitHub actions. This composite action co
 
 **Repository Checkout**
 
-| Input                | Description                                              | Required                    | Default | Options                    |
-|----------------------|----------------------------------------------------------|-----------------------------|---------|----------------------------|
-| checkout             | Whether to checkout the repository                       | No                          | -       | `true`/`false`             |
-| checkout-ref         | The branch, tag or SHA to checkout                       | No                          | -       | any `branch`/`tag`/`SHA`   |
-| checkout-token       | Personal access token (PAT) used to fetch the repository | No                          | -       | `Token` used for checkout  |
-| checkout-fetch-depth | Depth of commit history to fetch                         | No                          | 0       | `0` (full)/`1`/`2`/...     |
-| checkout-submodules  |                                                          | Whether to fetch submodules | false   | `true`/`false`/`recursive` |
+| Input                | Description                                              | Required | Default | Options                    |
+|----------------------|----------------------------------------------------------|----------|---------|----------------------------|
+| checkout             | Whether to checkout the repository                       | No       | -       | `true`/`false`             |
+| checkout-ref         | The branch, tag or SHA to checkout                       | No       | -       | any `branch`/`tag`/`SHA`   |
+| checkout-token       | Personal access token (PAT) used to fetch the repository | No       | -       | `Token` used for checkout  |
+| checkout-fetch-depth | Depth of commit history to fetch                         | No       | 0       | `0` (full)/`1`/`2`/...     |
+| checkout-submodules  | Whether to fetch submodules                              | No       | false   | `true`/`false`/`recursive` |
 
 **Java**
 
