@@ -40,6 +40,7 @@ jobs:
           checkout-fetch-depth: 0
           checkout-ref: main
           checkout-token: ${{ secrets.GITHUB_TOKEN }}
+          checkout-submodules: false
           setup-java: true
           java-distribution: 'temurin'
           java-version: '25'
@@ -126,6 +127,7 @@ jobs:
           checkout: true
           checkout-fetch-depth: 0
           checkout-ref: main
+          checkout-submodules: false
           checkout-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Verify Checkout Outputs

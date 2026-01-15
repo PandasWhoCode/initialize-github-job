@@ -16,6 +16,10 @@ inputs:
     description: 'Depth of commit history to fetch'
     required: false
     default: '0'
+  checkout-submodules:
+    description: 'Whether to checkout submodules (true/false/recursive)'
+    default: 'false'
+    required: false
   setup-node:
     description: 'Whether to setup Node.js'
     required: false
@@ -200,6 +204,7 @@ runs:
         echo "::group::Checkout Code Parameters"
         echo "Ref: ${{ inputs.checkout-ref }}"
         echo "Fetch Depth: ${{ inputs.checkout-fetch-depth }}"
+        echo "Submodules: ${{ inputs.checkout-submodules }}"
         echo "::endgroup::"
 
     - name: Checkout Code
@@ -208,6 +213,7 @@ runs:
       if: ${{ inputs.checkout == 'true' }}
       with:
         fetch-depth: ${{ inputs.checkout-fetch-depth }}
+        submodules: ${{ inputs.checkout-submodules }}
         ref: ${{ inputs.checkout-ref }}
         token: ${{ inputs.checkout-token }}
 
