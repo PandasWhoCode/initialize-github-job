@@ -100,6 +100,15 @@ Common steps for initializing a job for GitHub actions. This composite action co
 | swift-prefer-oss-toolchain | Whether to prefer Swift open source toolchain over Xcode | No       | false   |
 | swift-sdks                 | Semi-colon separated list of Swift SDKs to install       | No       | -       |
 
+**Task**
+
+| Input          | Description                                              | Required | Default |
+|----------------|----------------------------------------------------------|----------|---------|
+| setup-task     | Whether to setup Task                                    | No       | -       |
+| task-version   | Task version to use                                      | No       | 3.50.0  |
+| task-retries   | Number of retries to set up task                         | No       | 3       |
+| checkout-token | Personal access token (PAT) used to fetch the repository | No       | -       |
+
 ### Outputs
 
 **Checkout Outputs**
