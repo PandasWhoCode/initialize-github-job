@@ -15,7 +15,7 @@ inputs:
   checkout-fetch-depth:
     description: 'Depth of commit history to fetch'
     required: false
-    default: '0'
+    default: '1'
   checkout-submodules:
     description: 'Whether to checkout submodules (true/false/recursive)'
     default: 'false'
