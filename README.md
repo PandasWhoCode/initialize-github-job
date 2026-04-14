@@ -7,7 +7,7 @@ Common steps for initializing a job for GitHub actions. This composite action co
 - Security hardening with Step Security's Harden Runner
 - Repository checkout with configurable options
 - Multi-language support (Node.js, Java, Python, Go, Rust, Swift)
-- Build tool setup (Gradle)
+- Build tool setup (Gradle, Task, gomplate)
 - Automatic caching for dependencies and build artifacts
 
 ## Usage
@@ -108,6 +108,12 @@ Common steps for initializing a job for GitHub actions. This composite action co
 | task-version   | Task version to use                                      | No       | 3.50.0  |
 | task-retries   | Number of retries to set up task                         | No       | 3       |
 | checkout-token | Personal access token (PAT) used to fetch the repository | No       | -       |
+
+**Gomplate**
+
+| Input          | Description              | Required | Default |
+|----------------|--------------------------|----------|---------|
+| setup-gomplate | Whether to setup gomplate | No       | -       |
 
 ### Outputs
 

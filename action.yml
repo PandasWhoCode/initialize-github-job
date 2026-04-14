@@ -120,6 +120,10 @@ inputs:
     description: 'Whether to setup Task'
     required: false
     default: 'false'
+  setup-gomplate:
+    description: 'Whether to setup gomplate'
+    required: false
+    default: 'false'
   task-version:
     description: 'Task version to use'
     required: false
@@ -392,6 +396,27 @@ runs:
         version: ${{ inputs.task-version }}
         repo-token: ${{ inputs.checkout-token }}
         max-retries: ${{ inputs.task-retries }}
+
+    - name: Set Up Gomplate Parameters
+      id: setup-gomplate-params
+      if: ${{ inputs.setup-gomplate == 'true' }}
+      shell: bash
+      run: |
+        echo "::group::Setting up gomplate"
+        echo "Version: v5.0.0"
+        echo "::endgroup::"
+
+    - name: Install Gomplate
+      id: setup-gomplate
+      if: ${{ inputs.setup-gomplate == 'true' }}
+      shell: bash
+      run: |
+        curl -sSfL "https://github.com/hairyhenderson/gomplate/releases/download/v5.0.0/gomplate_linux-amd64" \
+          -o /tmp/gomplate
+        curl -sSfL "https://github.com/hairyhenderson/gomplate/releases/download/v5.0.0/checksums-v5.0.0_sha256.txt" \
+          -o /tmp/gomplate_checksums.txt
+        echo "$(grep 'bin/gomplate_linux-amd64$' /tmp/gomplate_checksums.txt | awk '{print $1}')  /tmp/gomplate" | sha256sum -c -
+        sudo install -m 755 /tmp/gomplate /usr/local/bin/gomplate
 
 branding:
   icon: 'arrow-up-right'
