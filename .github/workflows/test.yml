@@ -125,7 +125,6 @@ jobs:
         id: test-checkout
         with:
           checkout: true
-          checkout-fetch-depth: 0
           checkout-ref: main
           checkout-submodules: false
           checkout-token: ${{ secrets.GITHUB_TOKEN }}
@@ -136,6 +135,9 @@ jobs:
           echo "Checkout Commit: ${{ steps.test-checkout.outputs.checkout-commit }}"
           git_value=$(git log -1 --oneline)
           echo "Git Commit: ${git_value}"
+          shallow_value=$(git rev-parse --is-shallow-repository)
+          echo "Is Shallow Repository: ${shallow_value}"
+          test "${shallow_value}" = "true"
 
   test-setup-java:
     name: Test Setup Java Action
