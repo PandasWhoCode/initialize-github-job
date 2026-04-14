@@ -411,11 +411,19 @@ runs:
       if: ${{ inputs.setup-gomplate == 'true' }}
       shell: bash
       run: |
-        curl -sSfL "https://github.com/hairyhenderson/gomplate/releases/download/v5.0.0/gomplate_linux-amd64" \
-          -o /tmp/gomplate
-        curl -sSfL "https://github.com/hairyhenderson/gomplate/releases/download/v5.0.0/checksums-v5.0.0_sha256.txt" \
-          -o /tmp/gomplate_checksums.txt
-        echo "$(grep 'bin/gomplate_linux-amd64$' /tmp/gomplate_checksums.txt | awk '{print $1}')  /tmp/gomplate" | sha256sum -c -
+        GOMPLATE_VERSION="v5.0.0"
+        GOMPLATE_RELEASE_URL="https://github.com/hairyhenderson/gomplate/releases/download/${GOMPLATE_VERSION}"
+
+        curl -sSfL "${GOMPLATE_RELEASE_URL}/gomplate_linux-amd64" \
+          -o /tmp/gomplate || { echo "Failed to download gomplate binary"; exit 1; }
+        curl -sSfL "${GOMPLATE_RELEASE_URL}/checksums-${GOMPLATE_VERSION}_sha256.txt" \
+          -o /tmp/gomplate_checksums.txt || { echo "Failed to download gomplate checksums"; exit 1; }
+        EXPECTED_SHA="$(grep 'bin/gomplate_linux-amd64$' /tmp/gomplate_checksums.txt | awk '{print $1}')"
+        if [ -z "${EXPECTED_SHA}" ]; then
+          echo "Unable to find checksum for gomplate_linux-amd64"
+          exit 1
+        fi
+        echo "${EXPECTED_SHA}  /tmp/gomplate" | sha256sum -c - || { echo "Gomplate checksum verification failed"; exit 1; }
         sudo install -m 755 /tmp/gomplate /usr/local/bin/gomplate
 
 branding:
