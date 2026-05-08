@@ -282,6 +282,15 @@ runs:
         cache-disabled: ${{ inputs.gradle-cache-disabled == 'true' }}
         gradle-version: ${{ inputs.gradle-version }}
 
+    - name: Set Up TestLens Parameters
+      id: setup-testlens-params
+      if: ${{ inputs.setup-testlens == 'true' }}
+      shell: bash
+      run: |
+        echo "::group::Setting up TestLens."
+        echo "Write Log Files: ${{ inputs.testlens-write-log-files == 'true' }}"
+        echo "::endgroup::"
+
     - name: Setup TestLens
       id: setup-testlens
       if: ${{ inputs.setup-testlens == 'true' }}
