@@ -202,6 +202,32 @@ jobs:
           echo "Gradle Dependency Graph File: ${{ steps.test-setup-gradle.outputs.gradle-dependency-graph-file }}"
           gradle -v
 
+  test-setup-testlens:
+    name: Test Setup TestLens Action
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden Runner
+        id: harden-runner
+        uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
+        with:
+          egress-policy: audit
+
+      - name: Checkout Repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Run Setup TestLens Action
+        uses: ./
+        id: test-setup-testlens
+        env:
+          GRADLE_USER_HOME: "${{ github.workspace }}/gradle-home" # simulate environment provided by setup-gradle
+        with:
+          setup-testlens: true
+          testlens-write-log-files: false
+
+      - name: Verify TestLens
+        run: |
+          cat "$GRADLE_USER_HOME/init.d/testlens-init.gradle"
+
   test-setup-node:
     name: Test Setup Node.js Action
     runs-on: ubuntu-latest
