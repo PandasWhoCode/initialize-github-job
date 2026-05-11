@@ -393,7 +393,7 @@ runs:
     - name: Setup Swift
       id: setup-swift
       if: ${{ inputs.setup-swift == 'true' }}
-      uses: SwiftyLab/setup-swift@86a5d3b9cffda409de636eb5f63f3f5696fdbe36 # v1.13.0
+      uses: SwiftyLab/setup-swift@38f54a76b70d989321de9dc7c840618c08cf56e9 # v1.14.0
       with:
         swift-version: ${{ inputs.swift-version }}
         cache-snapshot: ${{ inputs.swift-cache == 'true' }}
