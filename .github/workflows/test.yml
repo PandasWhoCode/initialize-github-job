@@ -215,18 +215,11 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-      - name: Simulate Gradle setup # simulate environment provided by setup-gradle
-        env:
-          GRADLE_USER_HOME: "${{ github.workspace }}/gradle-home"
-        run: |
-          mkdir -p "$GRADLE_USER_HOME/init.d"
-
       - name: Run Setup TestLens Action
         uses: ./
         id: test-setup-testlens
-        env:
-          GRADLE_USER_HOME: "${{ github.workspace }/gradle-home"
         with:
+          setup-gradle: true # required to make 'setup-testlens' do something
           setup-testlens: true
           testlens-write-log-files: false
 
