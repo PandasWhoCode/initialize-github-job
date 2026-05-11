@@ -54,6 +54,13 @@ Common steps for initializing a job for GitHub actions. This composite action co
 | gradle-cache-read-only | Whether to use read-only caching for Gradle                                                | No       | -       |
 | cache-write-only       | When true, entries will not be restored from cache but will be saved at the end of the Job | No       | false   |
 
+**TestLens**
+
+| Input                    | Description                                                        | Required | Default |
+|--------------------------|--------------------------------------------------------------------|----------|---------|
+| setup-testlens           | Whether to setup TestLens                                          | No       | -       |
+| testlens-write-log-files | Whether to instruct TestLens to write log files about its activity | No       | false   |
+
 **Node.js**
 
 | Input             | Description                                     | Required | Default |

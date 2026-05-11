@@ -65,6 +65,13 @@ inputs:
     description: 'When true, entries will not be restored from the cache but will be saved at the end of the Job.'
     required: false
     default: 'false'
+  setup-testlens:
+    description: 'Whether to setup TestLens'
+    required: false
+  testlens-write-log-files:
+    description: 'Whether to instruct TestLens to write log files about its activity'
+    required: false
+    default: 'false'
   setup-python:
     description: 'Whether to setup Python'
     required: false
@@ -274,6 +281,22 @@ runs:
         cache-write-only: ${{ inputs.cache-write-only == 'true' }}
         cache-disabled: ${{ inputs.gradle-cache-disabled == 'true' }}
         gradle-version: ${{ inputs.gradle-version }}
+
+    - name: Set Up TestLens Parameters
+      id: setup-testlens-params
+      if: ${{ inputs.setup-testlens == 'true' }}
+      shell: bash
+      run: |
+        echo "::group::Setting up TestLens."
+        echo "Write Log Files: ${{ inputs.testlens-write-log-files == 'true' }}"
+        echo "::endgroup::"
+
+    - name: Setup TestLens
+      id: setup-testlens
+      if: ${{ inputs.setup-testlens == 'true' }}
+      uses: testlens-app/setup-testlens@d96a555133c275a00949d2cc77b70fe9a4242ebf # v1.9.2
+      with:
+        write-log-files: ${{ inputs.testlens-write-log-files == 'true' }}
 
     - name: Set Up NodeJS Parameters
       id: setup-node-params
