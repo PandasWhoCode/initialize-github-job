@@ -219,16 +219,16 @@ jobs:
         uses: ./
         id: test-setup-testlens
         env:
-          GRADLE_USER_HOME: "${{ github.workspace }}/gradle-home" # simulate environment provided by setup-gradle
+          GRADLE_USER_HOME: "${{ github.workspace }}" # simulate environment provided by setup-gradle
         with:
           setup-testlens: true
           testlens-write-log-files: false
 
       - name: Verify TestLens
         env:
-          GRADLE_USER_HOME: "${{ github.workspace }}/gradle-home"
+          GRADLE_USER_HOME: "${{ github.workspace }}"
         run: |
-          cat "$GRADLE_USER_HOME/init.d/testlens-init.gradle"
+          cat "$GRADLE_USER_HOME/testlens-init.gradle"
 
   test-setup-node:
     name: Test Setup Node.js Action
