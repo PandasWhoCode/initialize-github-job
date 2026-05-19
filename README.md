@@ -4,7 +4,7 @@ Common steps for initializing a job for GitHub actions. This composite action co
 
 ## Features
 
-- Security hardening with Step Security's Harden Runner
+- Security hardening with Step Security's Harden Runner (configurable egress policy)
 - Repository checkout with configurable options
 - Multi-language support (Node.js, Java, Python, Go, Rust, Swift)
 - Build tool setup (Gradle, Task, gomplate)
@@ -25,15 +25,23 @@ Common steps for initializing a job for GitHub actions. This composite action co
 
 ### Inputs
 
+**Harden Runner**
+
+| Input         | Description                                  | Required | Default | Options           |
+|---------------|----------------------------------------------|----------|---------|-------------------|
+| egress-policy | Egress policy to apply to the runner         | No       | audit   | `audit`/`block`   |
+
 **Repository Checkout**
 
-| Input                | Description                                              | Required | Default | Options                    |
-|----------------------|----------------------------------------------------------|----------|---------|----------------------------|
-| checkout             | Whether to checkout the repository                       | No       | -       | `true`/`false`             |
-| checkout-ref         | The branch, tag or SHA to checkout                       | No       | -       | any `branch`/`tag`/`SHA`   |
-| checkout-token       | Personal access token (PAT) used to fetch the repository | No       | -       | `Token` used for checkout  |
-| checkout-fetch-depth | Depth of commit history to fetch                         | No       | 1       | `0` (full)/`1`/`2`/...     |
-| checkout-submodules  | Whether to fetch submodules                              | No       | false   | `true`/`false`/`recursive` |
+| Input                | Description                                                                  | Required | Default | Options                    |
+|----------------------|------------------------------------------------------------------------------|----------|---------|----------------------------|
+| checkout             | Whether to checkout the repository                                           | No       | -       | `true`/`false`             |
+| checkout-ref         | The branch, tag or SHA to checkout                                           | No       | -       | any `branch`/`tag`/`SHA`   |
+| checkout-token       | Personal access token (PAT) used to fetch the repository                     | No       | -       | `Token` used for checkout  |
+| checkout-path        | Path to checkout the repository into (relative to `${GITHUB_WORKSPACE}`)     | No       | `.`     | any relative path          |
+| checkout-fetch-depth | Depth of commit history to fetch                                             | No       | 1       | `0` (full)/`1`/`2`/...     |
+| checkout-persist     | Whether to configure the token with the local git config                     | No       | true    | `true`/`false`             |
+| checkout-submodules  | Whether to fetch submodules                                                  | No       | false   | `true`/`false`/`recursive` |
 
 **Java**
 
@@ -63,12 +71,13 @@ Common steps for initializing a job for GitHub actions. This composite action co
 
 **Node.js**
 
-| Input             | Description                                     | Required | Default |
-|-------------------|-------------------------------------------------|----------|---------|
-| setup-node        | Whether to setup Node.js                        | No       | -       |
-| node-version      | Node.js version to use                          | No       | -       |
-| node-cache        | Package manager for caching (npm, yarn, pnpm)   | No       | -       |
-| node-check-latest | Whether to check for the latest Node.js version | No       | -       |
+| Input             | Description                                                          | Required | Default                       |
+|-------------------|----------------------------------------------------------------------|----------|-------------------------------|
+| setup-node        | Whether to setup Node.js                                             | No       | -                             |
+| node-version      | Node.js version to use                                               | No       | -                             |
+| node-cache        | Package manager for caching (npm, yarn, pnpm)                        | No       | -                             |
+| node-check-latest | Whether to check for the latest Node.js version                      | No       | -                             |
+| node-registry     | Registry URL to use for Node.js package installation and publishing  | No       | `https://registry.npmjs.org/` |
 
 **Python**
 
@@ -118,8 +127,8 @@ Common steps for initializing a job for GitHub actions. This composite action co
 
 **Gomplate**
 
-| Input          | Description              | Required | Default |
-|----------------|--------------------------|----------|---------|
+| Input          | Description               | Required | Default |
+|----------------|---------------------------|----------|---------|
 | setup-gomplate | Whether to setup gomplate | No       | false   |
 
 > [!NOTE]
@@ -146,8 +155,10 @@ Common steps for initializing a job for GitHub actions. This composite action co
 - `gradle-version`: Version of Gradle that was setup
 
 **Node.js Outputs**
+
 - `node-cache-hit`: Boolean indicating if cache was hit
 - `node-version`: The installed node version
+- `node-registry-url`: The registry URL used for package installation and publishing
 
 **Python Outputs**
 
@@ -219,6 +230,18 @@ Common steps for initializing a job for GitHub actions. This composite action co
     setup-python: 'true'
     python-version: '3.12'
     python-cache: 'pip'
+```
+
+**Blocking Egress Traffic**
+
+By default the Harden Runner step runs in `audit` mode. Set `egress-policy` to `block` to deny any
+network traffic that has not been explicitly allowed by the runner's policy.
+
+```yaml
+- uses: PandasWhoCode/initialize-github-job@v1
+  with:
+    egress-policy: 'block'
+    checkout: 'true'
 ```
 
 ## License
