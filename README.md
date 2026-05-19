@@ -140,7 +140,6 @@ Common steps for initializing a job for GitHub actions. This composite action co
 
 - `checkout-ref`: The branch, tag or SHA that was checked out
 - `checkout-commit`: The commit SHA that was checked out
-- `checkout-path`: The path that the repository was checked out into (relative to `$GITHUB_WORKSPACE`)
 
 **Java Outputs**
 

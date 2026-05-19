@@ -69,7 +69,6 @@ jobs:
           echo "::group::Verify Checkout Outputs"
             echo "Checkout Ref: ${{ steps.test-all.outputs.checkout-ref }}"
             echo "Checkout Commit: ${{ steps.test-all.outputs.checkout-commit }}"
-            echo "Checkout Path: ${{ steps.test-all.outputs.checkout-path }}"
           echo "::endgroup::"
           echo "::group::Verify Java Outputs"
             echo "Java Distribution: ${{ steps.test-all.outputs.java-distribution }}"

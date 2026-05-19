@@ -160,9 +160,6 @@ outputs:
   checkout-commit:
     description: 'The commit SHA that was checked out'
     value: ${{ steps.checkout-code.outputs.commit }}
-  checkout-path:
-    description: 'The path that the repository was checked out into (relative to $GITHUB_WORKSPACE)'
-    value: ${{ steps.checkout-code.outputs.path }}
   java-distribution:
     description: 'Distribution of Java that has been installed'
     value: ${{ steps.setup-java.outputs.distribution }}
