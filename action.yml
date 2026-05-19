@@ -3,6 +3,10 @@ description: 'Common steps for initializing a job for GitHub actions'
 author: 'PandasWhoCode'
 
 inputs:
+  egress-policy:
+    description: 'Egress policy to apply to the runner (audit or block)'
+    required: false
+    default: 'audit'
   checkout:
     description: 'Whether to checkout the repository'
     required: false
@@ -12,10 +16,18 @@ inputs:
   checkout-token:
     description: 'Personal access token (PAT) used to fetch the repository and set up task'
     required: false
+  checkout-path:
+    description: 'The path to checkout the repository into (relative to ${GITHUB_WORKSPACE})'
+    required: false
+    default: '.'
   checkout-fetch-depth:
     description: 'Depth of commit history to fetch'
     required: false
     default: '1'
+  checkout-persist:
+    description: 'Whether to configure the token with the local git config'
+    required: false
+    default: 'true'
   checkout-submodules:
     description: 'Whether to checkout submodules (true/false/recursive)'
     default: 'false'
@@ -148,6 +160,9 @@ outputs:
   checkout-commit:
     description: 'The commit SHA that was checked out'
     value: ${{ steps.checkout-code.outputs.commit }}
+  checkout-path:
+    description: 'The path that the repository was checked out into (relative to $GITHUB_WORKSPACE)'
+    value: ${{ steps.checkout-code.outputs.path }}
   java-distribution:
     description: 'Distribution of Java that has been installed'
     value: ${{ steps.setup-java.outputs.distribution }}
@@ -217,7 +232,7 @@ runs:
       id: harden-runner
       uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2.19.3
       with:
-        egress-policy: audit
+        egress-policy: ${{ inputs.egress-policy }}
 
     - name: Checkout Code Parameters
       id: checkout-params
@@ -239,6 +254,8 @@ runs:
         submodules: ${{ inputs.checkout-submodules }}
         ref: ${{ inputs.checkout-ref }}
         token: ${{ inputs.checkout-token }}
+        path: ${{ inputs.checkout-path }}
+        persist-credentials: ${{ inputs.checkout-persist }}
 
     - name: Set Up Java Parameters
       id: setup-java-params

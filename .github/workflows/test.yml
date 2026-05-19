@@ -36,10 +36,13 @@ jobs:
         uses: ./
         id: test-all
         with:
+          egress-policy: audit
           checkout: true
           checkout-fetch-depth: 0
           checkout-ref: main
           checkout-token: ${{ secrets.GITHUB_TOKEN }}
+          checkout-path: '.'
+          checkout-persist: true
           checkout-submodules: false
           setup-java: true
           java-distribution: 'temurin'
@@ -66,6 +69,7 @@ jobs:
           echo "::group::Verify Checkout Outputs"
             echo "Checkout Ref: ${{ steps.test-all.outputs.checkout-ref }}"
             echo "Checkout Commit: ${{ steps.test-all.outputs.checkout-commit }}"
+            echo "Checkout Path: ${{ steps.test-all.outputs.checkout-path }}"
           echo "::endgroup::"
           echo "::group::Verify Java Outputs"
             echo "Java Distribution: ${{ steps.test-all.outputs.java-distribution }}"
@@ -83,6 +87,7 @@ jobs:
           echo "::group::Verify Node.js Outputs"
             echo "Node.js Version: ${{ steps.test-all.outputs.node-version }}"
             echo "Node.js Cache Hit: ${{ steps.test-all.outputs.node-cache-hit }}"
+            echo "Node.js Registry URL: ${{ steps.test-all.outputs.node-registry-url }}"
             node -v
             npm -v
           echo "::endgroup::"
@@ -113,6 +118,25 @@ jobs:
           echo "::group::Verify Gomplate Installation"
             gomplate --version
           echo "::endgroup::"
+
+  test-egress-policy:
+    name: Test Egress Policy Input
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden Runner
+        id: harden-runner
+        uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2.19.3
+        with:
+          egress-policy: audit
+
+      - name: Checkout Repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Run Action with Explicit Egress Policy
+        uses: ./
+        id: test-egress-policy
+        with:
+          egress-policy: audit
 
   test-checkout:
     name: Test Checkout Action
