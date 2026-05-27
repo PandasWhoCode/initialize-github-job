@@ -457,8 +457,9 @@ jobs:
           EXPECTED_VERSION: 4.3.3
         run: |
           ACTUAL="$(gomplate --version)"
+          ESCAPED_EXPECTED_VERSION="$(printf '%s\n' "${EXPECTED_VERSION}" | sed 's/[][(){}.^$*+?|\\]/\\&/g')"
           echo "gomplate reported: ${ACTUAL}"
-          if ! echo "${ACTUAL}" | grep -qE "(^|[^0-9.])${EXPECTED_VERSION}([^0-9.]|$)"; then
+          if ! echo "${ACTUAL}" | grep -qE "(^|[^0-9.])${ESCAPED_EXPECTED_VERSION}([^0-9.]|$)"; then
             echo "Expected gomplate version ${EXPECTED_VERSION}, got: ${ACTUAL}"
             exit 1
           fi
