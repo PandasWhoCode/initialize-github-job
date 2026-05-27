@@ -127,9 +127,10 @@ Common steps for initializing a job for GitHub actions. This composite action co
 
 **Gomplate**
 
-| Input          | Description               | Required | Default |
-|----------------|---------------------------|----------|---------|
-| setup-gomplate | Whether to setup gomplate | No       | false   |
+| Input            | Description                           | Required | Default |
+|------------------|---------------------------------------|----------|---------|
+| setup-gomplate   | Whether to setup gomplate             | No       | false   |
+| gomplate-version | Gomplate version to use (e.g. v5.0.0) | No       | v5.0.0  |
 
 > [!NOTE]
 > `setup-gomplate` currently installs the Linux AMD64 gomplate release artifact.

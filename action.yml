@@ -143,6 +143,10 @@ inputs:
     description: 'Whether to setup gomplate'
     required: false
     default: 'false'
+  gomplate-version:
+    description: 'Gomplate version to use (e.g. v5.0.0)'
+    required: false
+    default: 'v5.0.0'
   task-version:
     description: 'Task version to use'
     required: false
@@ -438,17 +442,24 @@ runs:
       id: setup-gomplate-params
       if: ${{ inputs.setup-gomplate == 'true' }}
       shell: bash
+      env:
+        GOMPLATE_VERSION: ${{ inputs.gomplate-version }}
       run: |
         echo "::group::Setting up gomplate"
-        echo "Version: v5.0.0"
+        echo "Version: ${GOMPLATE_VERSION}"
         echo "::endgroup::"
 
     - name: Install Gomplate
       id: setup-gomplate
       if: ${{ inputs.setup-gomplate == 'true' }}
       shell: bash
+      env:
+        GOMPLATE_VERSION: ${{ inputs.gomplate-version }}
       run: |
-        GOMPLATE_VERSION="v5.0.0"
+        if [[ ! "${GOMPLATE_VERSION}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          echo "Invalid gomplate-version: '${GOMPLATE_VERSION}' (expected format vMAJOR.MINOR.PATCH, e.g. v5.0.0)"
+          exit 1
+        fi
         GOMPLATE_RELEASE_URL="https://github.com/hairyhenderson/gomplate/releases/download/${GOMPLATE_VERSION}"
 
         curl -sSfL "${GOMPLATE_RELEASE_URL}/gomplate_linux-amd64" \

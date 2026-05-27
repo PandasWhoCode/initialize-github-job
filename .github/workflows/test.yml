@@ -432,3 +432,34 @@ jobs:
       - name: Verify Gomplate Installation
         run: |
           gomplate --version
+
+  test-setup-gomplate-custom-version:
+    name: Test Setup Gomplate (custom version)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden Runner
+        id: harden-runner
+        uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2.19.3
+        with:
+          egress-policy: audit
+
+      - name: Checkout Repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Run Setup Gomplate Action (non-default version)
+        uses: ./
+        with:
+          setup-gomplate: true
+          gomplate-version: v4.3.3
+
+      - name: Verify Gomplate Version Matches Input
+        env:
+          EXPECTED_VERSION: 4.3.3
+        run: |
+          ACTUAL="$(gomplate --version)"
+          ESCAPED_EXPECTED_VERSION="$(printf '%s\n' "${EXPECTED_VERSION}" | sed 's/[][(){}.^$*+?|\\]/\\&/g')"
+          echo "gomplate reported: ${ACTUAL}"
+          if ! echo "${ACTUAL}" | grep -qE "(^|[^0-9.])${ESCAPED_EXPECTED_VERSION}([^0-9.]|$)"; then
+            echo "Expected gomplate version ${EXPECTED_VERSION}, got: ${ACTUAL}"
+            exit 1
+          fi
