@@ -162,7 +162,7 @@ inputs:
   jq-version:
     description: 'Desired jq version (e.g. 1.7.1)'
     required: false
-    default: '1.7.1'
+    default: '1.8.1'
 
 # expose outputs from the sub-actions
 outputs:
@@ -502,7 +502,11 @@ runs:
               echo "::endgroup::"
             fi
 
-            if [[ "$(jq --version)" != "jq-${{ inputs.jq-version }}" ]]; then
+            # jq <1.8 truncates `jq --version` to `jq-X.Y` even for patch releases;
+            # 1.8+ reports the full `jq-X.Y.Z`. Accept either shape as a match.
+            JQ_INSTALLED="$(jq --version)"
+            JQ_WANT_MAJOR_MINOR="$(echo "${{ inputs.jq-version }}" | cut -d. -f1,2)"
+            if [[ "${JQ_INSTALLED}" != "jq-${{ inputs.jq-version }}" && "${JQ_INSTALLED}" != "jq-${JQ_WANT_MAJOR_MINOR}" ]]; then
               echo "::group::Updating JQ Version"
               sudo apt-get update
               sudo apt-get install -y --only-upgrade jq
@@ -523,7 +527,9 @@ runs:
               echo "::endgroup::"
             fi
 
-            if [[ "$(jq --version)" != "jq-${{ inputs.jq-version }}" ]]; then
+            JQ_INSTALLED="$(jq --version)"
+            JQ_WANT_MAJOR_MINOR="$(echo "${{ inputs.jq-version }}" | cut -d. -f1,2)"
+            if [[ "${JQ_INSTALLED}" != "jq-${{ inputs.jq-version }}" && "${JQ_INSTALLED}" != "jq-${JQ_WANT_MAJOR_MINOR}" ]]; then
               echo "::group::Updating JQ Version"
               brew update
               brew upgrade jq
