@@ -450,25 +450,29 @@ runs:
       id: setup-gomplate-params
       if: ${{ inputs.setup-gomplate == 'true' }}
       shell: bash
+      env:
+        GOMPLATE_VERSION: ${{ inputs.gomplate-version }}
       run: |
         echo "::group::Setting up gomplate"
-        echo "Version: ${{ inputs.gomplate-version }}"
+        echo "Version: ${GOMPLATE_VERSION}"
         echo "::endgroup::"
 
     - name: Install Gomplate
       id: setup-gomplate
       if: ${{ inputs.setup-gomplate == 'true' }}
       shell: bash
+      env:
+        GOMPLATE_VERSION: ${{ inputs.gomplate-version }}
       run: |
-        if [[ ! "${{ inputs.gomplate-version }}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-          echo "Invalid gomplate-version: '${{ inputs.gomplate-version }}' (expected format vMAJOR.MINOR.PATCH, e.g. v5.0.0)"
+        if [[ ! "${GOMPLATE_VERSION}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          echo "Invalid gomplate-version: '${GOMPLATE_VERSION}' (expected format vMAJOR.MINOR.PATCH, e.g. v5.0.0)"
           exit 1
         fi
-        GOMPLATE_RELEASE_URL="https://github.com/hairyhenderson/gomplate/releases/download/${{ inputs.gomplate-version }}"
+        GOMPLATE_RELEASE_URL="https://github.com/hairyhenderson/gomplate/releases/download/${GOMPLATE_VERSION}"
 
         curl -sSfL "${GOMPLATE_RELEASE_URL}/gomplate_linux-amd64" \
           -o /tmp/gomplate || { echo "Failed to download gomplate binary"; exit 1; }
-        curl -sSfL "${GOMPLATE_RELEASE_URL}/checksums-${{ inputs.gomplate-version }}_sha256.txt" \
+        curl -sSfL "${GOMPLATE_RELEASE_URL}/checksums-${GOMPLATE_VERSION}_sha256.txt" \
           -o /tmp/gomplate_checksums.txt || { echo "Failed to download gomplate checksums"; exit 1; }
         EXPECTED_SHA="$(grep 'bin/gomplate_linux-amd64$' /tmp/gomplate_checksums.txt | awk '{print $1}')"
         if [ -z "${EXPECTED_SHA}" ]; then
@@ -482,16 +486,20 @@ runs:
       id: setup-jq-params
       if: ${{ inputs.setup-jq == 'true' }}
       shell: bash
+      env:
+        JQ_VERSION: ${{ inputs.jq-version }}
       run: |
         echo "::group::Setting up jq"
         echo "Runner OS: ${RUNNER_OS}"
-        echo "Desired Version: ${{ inputs.jq-version }}"
+        echo "Desired Version: ${JQ_VERSION}"
         echo "::endgroup::"
 
     - name: Install JQ
       id: setup-jq
       if: ${{ inputs.setup-jq == 'true' }}
       shell: bash
+      env:
+        JQ_VERSION: ${{ inputs.jq-version }}
       run: |
         case "${RUNNER_OS}" in
           Linux)
@@ -505,18 +513,11 @@ runs:
             # jq <1.8 truncates `jq --version` to `jq-X.Y` even for patch releases;
             # 1.8+ reports the full `jq-X.Y.Z`. Accept either shape as a match.
             JQ_INSTALLED="$(jq --version)"
-            JQ_WANT_MAJOR_MINOR="$(echo "${{ inputs.jq-version }}" | cut -d. -f1,2)"
-            if [[ "${JQ_INSTALLED}" != "jq-${{ inputs.jq-version }}" && "${JQ_INSTALLED}" != "jq-${JQ_WANT_MAJOR_MINOR}" ]]; then
+            JQ_WANT_MAJOR_MINOR="$(echo "${JQ_VERSION}" | cut -d. -f1,2)"
+            if [[ "${JQ_INSTALLED}" != "jq-${JQ_VERSION}" && "${JQ_INSTALLED}" != "jq-${JQ_WANT_MAJOR_MINOR}" ]]; then
               echo "::group::Updating JQ Version"
               sudo apt-get update
               sudo apt-get install -y --only-upgrade jq
-              echo "::endgroup::"
-            fi
-
-            if ! command -v tee >/dev/null 2>&1; then
-              echo "::group::Setup Tee Command"
-              sudo apt-get update
-              sudo apt-get install -y coreutils
               echo "::endgroup::"
             fi
             ;;
@@ -528,17 +529,11 @@ runs:
             fi
 
             JQ_INSTALLED="$(jq --version)"
-            JQ_WANT_MAJOR_MINOR="$(echo "${{ inputs.jq-version }}" | cut -d. -f1,2)"
-            if [[ "${JQ_INSTALLED}" != "jq-${{ inputs.jq-version }}" && "${JQ_INSTALLED}" != "jq-${JQ_WANT_MAJOR_MINOR}" ]]; then
+            JQ_WANT_MAJOR_MINOR="$(echo "${JQ_VERSION}" | cut -d. -f1,2)"
+            if [[ "${JQ_INSTALLED}" != "jq-${JQ_VERSION}" && "${JQ_INSTALLED}" != "jq-${JQ_WANT_MAJOR_MINOR}" ]]; then
               echo "::group::Updating JQ Version"
               brew update
               brew upgrade jq
-              echo "::endgroup::"
-            fi
-
-            if ! command -v tee >/dev/null 2>&1; then
-              echo "::group::Setup Tee Command"
-              brew install coreutils
               echo "::endgroup::"
             fi
             ;;
