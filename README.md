@@ -140,12 +140,15 @@ Common steps for initializing a job for GitHub actions. This composite action co
 | Input      | Description                       | Required | Default |
 |------------|-----------------------------------|----------|---------|
 | setup-jq   | Whether to setup jq               | No       | false   |
-| jq-version | Desired jq version (e.g. 1.7.1)   | No       | 1.7.1   |
+| jq-version | Desired jq version (e.g. 1.8.1)   | No       | 1.8.1   |
 
 > [!NOTE]
-> `setup-jq` supports Linux (apt) and macOS (brew) runners. If the installed
-> version differs from `jq-version`, an upgrade is attempted via the system
-> package manager.
+> `setup-jq` downloads the requested jq release directly from
+> `github.com/jqlang/jq` (with sha256 verification) and installs it to
+> `/usr/local/bin/jq`. Supports Linux and macOS on `amd64`/`arm64`.
+> jq <1.8 truncates `jq --version` to `jq-X.Y` even on patch releases — the
+> binary itself is the exact requested version, but the reported version
+> string cannot distinguish 1.7.0 from 1.7.1.
 
 ### Outputs
 
