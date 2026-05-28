@@ -510,11 +510,11 @@ jobs:
         uses: ./
         with:
           setup-jq: true
-          jq-version: 1.8.0
+          jq-version: 1.8.1
 
       - name: Verify JQ Version Matches Input
         env:
-          EXPECTED_VERSION: 1.8.0
+          EXPECTED_VERSION: 1.8.1
         run: |
           ACTUAL="$(jq --version)"
           ESCAPED_EXPECTED_VERSION="$(printf '%s\n' "${EXPECTED_VERSION}" | sed 's/[][(){}.^$*+?|\\]/\\&/g')"
