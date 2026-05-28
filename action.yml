@@ -155,6 +155,14 @@ inputs:
     description: 'Number of retries for Task setup in case of failure, default is 3.'
     required: false
     default: '3'
+  setup-jq:
+    description: 'Whether to setup jq'
+    required: false
+    default: 'false'
+  jq-version:
+    description: 'Desired jq version (e.g. 1.7.1)'
+    required: false
+    default: '1.7.1'
 
 # expose outputs from the sub-actions
 outputs:
@@ -442,29 +450,25 @@ runs:
       id: setup-gomplate-params
       if: ${{ inputs.setup-gomplate == 'true' }}
       shell: bash
-      env:
-        GOMPLATE_VERSION: ${{ inputs.gomplate-version }}
       run: |
         echo "::group::Setting up gomplate"
-        echo "Version: ${GOMPLATE_VERSION}"
+        echo "Version: ${{ inputs.gomplate-version }}"
         echo "::endgroup::"
 
     - name: Install Gomplate
       id: setup-gomplate
       if: ${{ inputs.setup-gomplate == 'true' }}
       shell: bash
-      env:
-        GOMPLATE_VERSION: ${{ inputs.gomplate-version }}
       run: |
-        if [[ ! "${GOMPLATE_VERSION}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-          echo "Invalid gomplate-version: '${GOMPLATE_VERSION}' (expected format vMAJOR.MINOR.PATCH, e.g. v5.0.0)"
+        if [[ ! "${{ inputs.gomplate-version }}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          echo "Invalid gomplate-version: '${{ inputs.gomplate-version }}' (expected format vMAJOR.MINOR.PATCH, e.g. v5.0.0)"
           exit 1
         fi
-        GOMPLATE_RELEASE_URL="https://github.com/hairyhenderson/gomplate/releases/download/${GOMPLATE_VERSION}"
+        GOMPLATE_RELEASE_URL="https://github.com/hairyhenderson/gomplate/releases/download/${{ inputs.gomplate-version }}"
 
         curl -sSfL "${GOMPLATE_RELEASE_URL}/gomplate_linux-amd64" \
           -o /tmp/gomplate || { echo "Failed to download gomplate binary"; exit 1; }
-        curl -sSfL "${GOMPLATE_RELEASE_URL}/checksums-${GOMPLATE_VERSION}_sha256.txt" \
+        curl -sSfL "${GOMPLATE_RELEASE_URL}/checksums-${{ inputs.gomplate-version }}_sha256.txt" \
           -o /tmp/gomplate_checksums.txt || { echo "Failed to download gomplate checksums"; exit 1; }
         EXPECTED_SHA="$(grep 'bin/gomplate_linux-amd64$' /tmp/gomplate_checksums.txt | awk '{print $1}')"
         if [ -z "${EXPECTED_SHA}" ]; then
@@ -473,6 +477,74 @@ runs:
         fi
         echo "${EXPECTED_SHA}  /tmp/gomplate" | sha256sum -c - || { echo "Gomplate checksum verification failed"; exit 1; }
         sudo install -m 755 /tmp/gomplate /usr/local/bin/gomplate
+
+    - name: Set Up jq Parameters
+      id: setup-jq-params
+      if: ${{ inputs.setup-jq == 'true' }}
+      shell: bash
+      run: |
+        echo "::group::Setting up jq"
+        echo "Runner OS: ${RUNNER_OS}"
+        echo "Desired Version: ${{ inputs.jq-version }}"
+        echo "::endgroup::"
+
+    - name: Install JSON Tools
+      id: setup-jq
+      if: ${{ inputs.setup-jq == 'true' }}
+      shell: bash
+      run: |
+        case "${RUNNER_OS}" in
+          Linux)
+            if ! command -v jq >/dev/null 2>&1; then
+              echo "::group::Setup JQ Command"
+              sudo apt-get update
+              sudo apt-get install -y jq
+              echo "::endgroup::"
+            fi
+
+            if [[ "$(jq --version)" != "jq-${{ inputs.jq-version }}" ]]; then
+              echo "::group::Updating JQ Version"
+              sudo apt-get update
+              sudo apt-get install -y --only-upgrade jq
+              echo "::endgroup::"
+            fi
+
+            if ! command -v tee >/dev/null 2>&1; then
+              echo "::group::Setup Tee Command"
+              sudo apt-get update
+              sudo apt-get install -y coreutils
+              echo "::endgroup::"
+            fi
+            ;;
+          macOS)
+            if ! command -v jq >/dev/null 2>&1; then
+              echo "::group::Setup JQ Command"
+              brew install jq
+              echo "::endgroup::"
+            fi
+
+            if [[ "$(jq --version)" != "jq-${{ inputs.jq-version }}" ]]; then
+              echo "::group::Updating JQ Version"
+              brew update
+              brew upgrade jq
+              echo "::endgroup::"
+            fi
+
+            if ! command -v tee >/dev/null 2>&1; then
+              echo "::group::Setup Tee Command"
+              brew install coreutils
+              echo "::endgroup::"
+            fi
+            ;;
+          *)
+            echo "Unsupported runner OS for jq setup: ${RUNNER_OS}"
+            exit 1
+            ;;
+        esac
+
+        echo "::group::Show JQ Version"
+        jq --version
+        echo "::endgroup::"
 
 branding:
   icon: 'arrow-up-right'
