@@ -488,7 +488,7 @@ runs:
         echo "Desired Version: ${{ inputs.jq-version }}"
         echo "::endgroup::"
 
-    - name: Install JSON Tools
+    - name: Install JQ
       id: setup-jq
       if: ${{ inputs.setup-jq == 'true' }}
       shell: bash
