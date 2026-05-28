@@ -7,7 +7,7 @@ Common steps for initializing a job for GitHub actions. This composite action co
 - Security hardening with Step Security's Harden Runner (configurable egress policy)
 - Repository checkout with configurable options
 - Multi-language support (Node.js, Java, Python, Go, Rust, Swift)
-- Build tool setup (Gradle, Task, gomplate)
+- Build tool setup (Gradle, Task, gomplate, jq)
 - Automatic caching for dependencies and build artifacts
 
 ## Usage
@@ -134,6 +134,21 @@ Common steps for initializing a job for GitHub actions. This composite action co
 
 > [!NOTE]
 > `setup-gomplate` currently installs the Linux AMD64 gomplate release artifact.
+
+**jq**
+
+| Input      | Description                       | Required | Default |
+|------------|-----------------------------------|----------|---------|
+| setup-jq   | Whether to setup jq               | No       | false   |
+| jq-version | Desired jq version (e.g. 1.8.1)   | No       | 1.8.1   |
+
+> [!NOTE]
+> `setup-jq` downloads the requested jq release directly from
+> `github.com/jqlang/jq` (with sha256 verification) and installs it to
+> `/usr/local/bin/jq`. Supports Linux and macOS on `amd64`/`arm64`.
+> jq <1.8 truncates `jq --version` to `jq-X.Y` even on patch releases — the
+> binary itself is the exact requested version, but the reported version
+> string cannot distinguish 1.7.0 from 1.7.1.
 
 ### Outputs
 

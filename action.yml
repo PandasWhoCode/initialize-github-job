@@ -155,6 +155,14 @@ inputs:
     description: 'Number of retries for Task setup in case of failure, default is 3.'
     required: false
     default: '3'
+  setup-jq:
+    description: 'Whether to setup jq'
+    required: false
+    default: 'false'
+  jq-version:
+    description: 'Desired jq version (e.g. 1.8.1)'
+    required: false
+    default: '1.8.1'
 
 # expose outputs from the sub-actions
 outputs:
@@ -473,6 +481,64 @@ runs:
         fi
         echo "${EXPECTED_SHA}  /tmp/gomplate" | sha256sum -c - || { echo "Gomplate checksum verification failed"; exit 1; }
         sudo install -m 755 /tmp/gomplate /usr/local/bin/gomplate
+
+    - name: Set Up jq Parameters
+      id: setup-jq-params
+      if: ${{ inputs.setup-jq == 'true' }}
+      shell: bash
+      env:
+        JQ_VERSION: ${{ inputs.jq-version }}
+      run: |
+        echo "::group::Setting up jq"
+        echo "Runner OS: ${RUNNER_OS}"
+        echo "Runner Arch: ${RUNNER_ARCH}"
+        echo "Desired Version: ${JQ_VERSION}"
+        echo "::endgroup::"
+
+    - name: Install JQ
+      id: setup-jq
+      if: ${{ inputs.setup-jq == 'true' }}
+      shell: bash
+      env:
+        JQ_VERSION: ${{ inputs.jq-version }}
+      run: |
+        if [[ ! "${JQ_VERSION}" =~ ^[0-9]+\.[0-9]+(\.[0-9]+)?$ ]]; then
+          echo "Invalid jq-version: '${JQ_VERSION}' (expected MAJOR.MINOR[.PATCH], e.g. 1.8.1)"
+          exit 1
+        fi
+
+        case "${RUNNER_OS}" in
+          Linux) JQ_OS="linux" ;;
+          macOS) JQ_OS="macos" ;;
+          *) echo "Unsupported runner OS for jq setup: ${RUNNER_OS}"; exit 1 ;;
+        esac
+
+        case "${RUNNER_ARCH}" in
+          X64)   JQ_ARCH="amd64" ;;
+          ARM64) JQ_ARCH="arm64" ;;
+          *) echo "Unsupported runner arch for jq setup: ${RUNNER_ARCH}"; exit 1 ;;
+        esac
+
+        JQ_ASSET="jq-${JQ_OS}-${JQ_ARCH}"
+        JQ_RELEASE_URL="https://github.com/jqlang/jq/releases/download/jq-${JQ_VERSION}"
+
+        echo "::group::Download jq ${JQ_VERSION}"
+        curl -sSfL "${JQ_RELEASE_URL}/${JQ_ASSET}" \
+          -o /tmp/jq || { echo "Failed to download jq binary"; exit 1; }
+        curl -sSfL "${JQ_RELEASE_URL}/sha256sum.txt" \
+          -o /tmp/jq_checksums.txt || { echo "Failed to download jq checksums"; exit 1; }
+        EXPECTED_SHA="$(awk -v a="${JQ_ASSET}" '$2 == a { print $1 }' /tmp/jq_checksums.txt)"
+        if [ -z "${EXPECTED_SHA}" ]; then
+          echo "Unable to find checksum for ${JQ_ASSET}"
+          exit 1
+        fi
+        echo "${EXPECTED_SHA}  /tmp/jq" | shasum -a 256 -c - || { echo "jq checksum verification failed"; exit 1; }
+        sudo install -m 755 /tmp/jq /usr/local/bin/jq
+        echo "::endgroup::"
+
+        echo "::group::Show JQ Version"
+        jq --version
+        echo "::endgroup::"
 
 branding:
   icon: 'arrow-up-right'

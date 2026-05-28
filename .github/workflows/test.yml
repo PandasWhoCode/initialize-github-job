@@ -63,6 +63,7 @@ jobs:
           task-version: '3.50.0'
           task-retries: '3'
           setup-gomplate: true
+          setup-jq: true
 
       - name: Verify Setup
         run: |
@@ -116,6 +117,12 @@ jobs:
           echo "::endgroup::"
           echo "::group::Verify Gomplate Installation"
             gomplate --version
+          echo "::endgroup::"
+          echo "::group::Verify Task Installation"
+            task --version
+          echo "::endgroup::"
+          echo "::group::Verify JQ Installation"
+            jq --version
           echo "::endgroup::"
 
   test-egress-policy:
@@ -461,5 +468,58 @@ jobs:
           echo "gomplate reported: ${ACTUAL}"
           if ! echo "${ACTUAL}" | grep -qE "(^|[^0-9.])${ESCAPED_EXPECTED_VERSION}([^0-9.]|$)"; then
             echo "Expected gomplate version ${EXPECTED_VERSION}, got: ${ACTUAL}"
+            exit 1
+          fi
+
+  test-setup-jq:
+    name: Test Setup JQ
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden Runner
+        id: harden-runner
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        with:
+          egress-policy: audit
+
+      - name: Checkout Repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Run Setup JQ Action
+        uses: ./
+        with:
+          setup-jq: true
+
+      - name: Verify JQ Installation
+        run: |
+          jq --version
+
+  test-setup-jq-custom-version:
+    name: Test Setup JQ (custom version)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden Runner
+        id: harden-runner
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        with:
+          egress-policy: audit
+
+      - name: Checkout Repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Run Setup JQ Action (non-default version)
+        uses: ./
+        with:
+          setup-jq: true
+          jq-version: 1.8.0
+
+      - name: Verify JQ Version Matches Input
+        env:
+          EXPECTED_VERSION: 1.8.0
+        run: |
+          ACTUAL="$(jq --version)"
+          ESCAPED_EXPECTED_VERSION="$(printf '%s\n' "${EXPECTED_VERSION}" | sed 's/[][(){}.^$*+?|\\]/\\&/g')"
+          echo "jq reported: ${ACTUAL}"
+          if ! echo "${ACTUAL}" | grep -qE "(^jq-|[^0-9.])${ESCAPED_EXPECTED_VERSION}([^0-9.]|$)"; then
+            echo "Expected jq version ${EXPECTED_VERSION}, got: ${ACTUAL}"
             exit 1
           fi
