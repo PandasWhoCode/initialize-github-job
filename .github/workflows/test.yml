@@ -64,6 +64,7 @@ jobs:
           task-retries: '3'
           setup-gomplate: true
           setup-jq: true
+          setup-semver: true
 
       - name: Verify Setup
         run: |
@@ -123,6 +124,9 @@ jobs:
           echo "::endgroup::"
           echo "::group::Verify JQ Installation"
             jq --version
+          echo "::endgroup::"
+          echo "::group::Verify SemVer Installation"
+            semver --version
           echo "::endgroup::"
 
   test-egress-policy:
@@ -521,5 +525,35 @@ jobs:
           echo "jq reported: ${ACTUAL}"
           if ! echo "${ACTUAL}" | grep -qE "(^jq-|[^0-9.])${ESCAPED_EXPECTED_VERSION}([^0-9.]|$)"; then
             echo "Expected jq version ${EXPECTED_VERSION}, got: ${ACTUAL}"
+            exit 1
+          fi
+
+  test-setup-semver:
+    name: Test Setup SemVer Tools
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden Runner
+        id: harden-runner
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        with:
+          egress-policy: audit
+
+      - name: Checkout Repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Run Setup Semver
+        id: test-setup-semver
+        uses: ./
+        with:
+          setup-semver: true
+
+      - name: Verify SemVer Installation
+        run: |
+          INSTALLED_VERSION="$(semver --version)"
+          OUTPUT_VERSION="${{ steps.test-setup-semver.outputs.semver-version }}"
+          echo "semver reported: ${INSTALLED_VERSION}"
+          echo "semver output: ${OUTPUT_VERSION}"
+          if [[ "${INSTALLED_VERSION}" != "${OUTPUT_VERSION}" ]]; then
+            echo "Expected semver version ${OUTPUT_VERSION}, got: ${INSTALLED_VERSION}"
             exit 1
           fi

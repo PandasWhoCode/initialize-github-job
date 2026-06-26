@@ -150,6 +150,17 @@ Common steps for initializing a job for GitHub actions. This composite action co
 > binary itself is the exact requested version, but the reported version
 > string cannot distinguish 1.7.0 from 1.7.1.
 
+**SemVer**
+
+| Input        | Description                     | Required | Default |
+|--------------|---------------------------------|----------|---------|
+| setup-semver | Whether to setup semver         | No       | false   |
+
+> [!NOTE]
+> `setup-semver` downloads the semver script directly from
+> https://raw.githubusercontent.com/fsaintjacques/semver-tool/master/src/semver
+> and installs it to `/usr/local/bin/semver`.
+
 ### Outputs
 
 **Checkout Outputs**
@@ -197,6 +208,10 @@ Common steps for initializing a job for GitHub actions. This composite action co
 - `swift-version`: The actual Swift version that was configured
 - `swift-toolchain`: JSON formatted toolchain snapshot metadata
 - `swift-sdks`: JSON formatted SDK snapshots metadata
+
+**SemVer Outputs**
+
+- `semver-version`: The installed semver version
 
 ## Examples
 
@@ -246,6 +261,7 @@ Common steps for initializing a job for GitHub actions. This composite action co
     setup-python: 'true'
     python-version: '3.12'
     python-cache: 'pip'
+    setup-semver: 'true'
 ```
 
 **Blocking Egress Traffic**

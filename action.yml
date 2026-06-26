@@ -163,6 +163,10 @@ inputs:
     description: 'Desired jq version (e.g. 1.8.1)'
     required: false
     default: '1.8.1'
+  setup-semver:
+    description: 'Whether to setup semver tool'
+    required: false
+    default: 'false'
 
 # expose outputs from the sub-actions
 outputs:
@@ -232,6 +236,9 @@ outputs:
   swift-sdks:
     description: 'JSON formatted SDK snapshots metadata that were configured.'
     value: ${{ steps.setup-swift.outputs.sdks }}
+  semver-version:
+    description: 'The installed semver version.'
+    value: ${{ steps.setup-semver.outputs.version }}
 
 runs:
   using: 'composite'
@@ -538,6 +545,26 @@ runs:
 
         echo "::group::Show JQ Version"
         jq --version
+        echo "::endgroup::"
+
+    - name: Setup Semver
+      id: setup-semver
+      if: ${{ inputs.setup-semver == 'true' }}
+      shell: bash
+      run: |
+        echo "::group::Download SemVer Binary"
+        sudo curl -sSfL https://raw.githubusercontent.com/fsaintjacques/semver-tool/master/src/semver \
+          -o /tmp/semver || { echo "Failed to download semver binary"; exit 1; }
+        echo "::endgroup::"
+        
+        echo "::group::Change SemVer Binary Permissions"
+        sudo install -m 755 /tmp/semver /usr/local/bin/semver
+        echo "::endgroup::"
+        
+        echo "::group::Show SemVer Binary Version Info"
+        VERSION="$(/usr/local/bin/semver --version | tr -d '\n')"
+        echo "semver version: ${VERSION}"
+        echo "version=${VERSION}" >> "${GITHUB_OUTPUT}"
         echo "::endgroup::"
 
 branding:
