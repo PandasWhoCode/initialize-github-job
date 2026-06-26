@@ -157,7 +157,7 @@ Common steps for initializing a job for GitHub actions. This composite action co
 | setup-semver | Whether to setup semver         | No       | false   |
 
 > [!NOTE]
-> `setup-semver` downloads the latest semver release directly from
+> `setup-semver` downloads the semver script directly from
 > https://raw.githubusercontent.com/fsaintjacques/semver-tool/master/src/semver
 > and installs it to `/usr/local/bin/semver`.
 

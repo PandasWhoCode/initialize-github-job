@@ -164,7 +164,7 @@ inputs:
     required: false
     default: '1.8.1'
   setup-semver:
-    description: 'Whether to setup semver tools'
+    description: 'Whether to setup semver tool'
     required: false
     default: 'false'
 
@@ -553,15 +553,16 @@ runs:
       shell: bash
       run: |
         echo "::group::Download SemVer Binary"
-        sudo curl -L -o /usr/local/bin/semver https://raw.githubusercontent.com/fsaintjacques/semver-tool/master/src/semver
+        sudo curl -sSfL https://raw.githubusercontent.com/fsaintjacques/semver-tool/master/src/semver \
+          -o /tmp/semver || { echo "Failed to download semver binary"; exit 1; }
         echo "::endgroup::"
         
         echo "::group::Change SemVer Binary Permissions"
-        sudo chmod -v +x /usr/local/bin/semver
+        sudo install -m 755 /tmp/semver /usr/local/bin/semver
         echo "::endgroup::"
         
         echo "::group::Show SemVer Binary Version Info"
-        VERSION=$(semver --version)
+        VERSION="$(/usr/local/bin/semver --version | tr -d '\n')"
         echo "semver version: ${VERSION}"
         echo "version=${VERSION}" >> "${GITHUB_OUTPUT}"
         echo "::endgroup::"
