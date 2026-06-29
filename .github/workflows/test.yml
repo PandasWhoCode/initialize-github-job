@@ -187,7 +187,7 @@ jobs:
           checkout: true
           checkout-ref: main
           checkout-token: ${{ secrets.GITHUB_TOKEN }}
-          checkout-sparse: '.github/workflows/support'
+          checkout-sparse: '.github'
 
       - name: Verify Sparse Checkout Outputs
         run: |
