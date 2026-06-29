@@ -180,6 +180,23 @@ jobs:
           echo "Is Shallow Repository: ${shallow_value}"
           test "${shallow_value}" = "true"
 
+      - name: Run Sparse Checkout Action
+        uses: ./
+        id: test-sparse-checkout
+        with:
+          checkout: true
+          checkout-ref: main
+          checkout-token: ${{ secrets.GITHUB_TOKEN }}
+          checkout-sparse: '.github/workflows/support'
+
+      - name: Verify Sparse Checkout Outputs
+        run: |
+          echo "Checkout Ref: ${{ steps.test-sparse-checkout.outputs.checkout-ref }}"
+          echo "Checkout Commit: ${{ steps.test-sparse-checkout.outputs.checkout-commit }}"
+          sparse_list=$(git sparse-checkout list)
+          echo "sparse list: ${sparse_list}"
+          test "${sparse_list}" = ".github"
+
   test-setup-java:
     name: Test Setup Java Action
     runs-on: ubuntu-latest
