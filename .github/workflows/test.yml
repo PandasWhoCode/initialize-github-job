@@ -180,6 +180,36 @@ jobs:
           echo "Is Shallow Repository: ${shallow_value}"
           test "${shallow_value}" = "true"
 
+  test-sparse-checkout:
+    name: Test Sparse Checkout Action
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden Runner
+        id: harden-runner
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        with:
+          egress-policy: audit
+
+      - name: Checkout Repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Run Sparse Checkout Action
+        uses: ./
+        id: test-sparse-checkout
+        with:
+          checkout: true
+          checkout-ref: main
+          checkout-token: ${{ secrets.GITHUB_TOKEN }}
+          checkout-sparse: '.github'
+
+      - name: Verify Sparse Checkout Outputs
+        run: |
+          echo "Checkout Ref: ${{ steps.test-sparse-checkout.outputs.checkout-ref }}"
+          echo "Checkout Commit: ${{ steps.test-sparse-checkout.outputs.checkout-commit }}"
+          sparse_list=$(git sparse-checkout list)
+          echo "sparse list: ${sparse_list}"
+          test "${sparse_list}" = ".github"
+
   test-setup-java:
     name: Test Setup Java Action
     runs-on: ubuntu-latest

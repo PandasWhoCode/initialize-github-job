@@ -33,15 +33,17 @@ Common steps for initializing a job for GitHub actions. This composite action co
 
 **Repository Checkout**
 
-| Input                | Description                                                                  | Required | Default | Options                    |
-|----------------------|------------------------------------------------------------------------------|----------|---------|----------------------------|
-| checkout             | Whether to checkout the repository                                           | No       | -       | `true`/`false`             |
-| checkout-ref         | The branch, tag or SHA to checkout                                           | No       | -       | any `branch`/`tag`/`SHA`   |
-| checkout-token       | Personal access token (PAT) used to fetch the repository                     | No       | -       | `Token` used for checkout  |
-| checkout-path        | Path to checkout the repository into (relative to `${GITHUB_WORKSPACE}`)     | No       | `.`     | any relative path          |
-| checkout-fetch-depth | Depth of commit history to fetch                                             | No       | 1       | `0` (full)/`1`/`2`/...     |
-| checkout-persist     | Whether to configure the token with the local git config                     | No       | true    | `true`/`false`             |
-| checkout-submodules  | Whether to fetch submodules                                                  | No       | false   | `true`/`false`/`recursive` |
+| Input                       | Description                                                              | Required | Default | Options                    |
+|-----------------------------|--------------------------------------------------------------------------|----------|---------|----------------------------|
+| checkout                    | Whether to checkout the repository                                       | No       | -       | `true`/`false`             |
+| checkout-ref                | The branch, tag or SHA to checkout                                       | No       | -       | any `branch`/`tag`/`SHA`   |
+| checkout-token              | Personal access token (PAT) used to fetch the repository                 | No       | -       | `Token` used for checkout  |
+| checkout-path               | Path to checkout the repository into (relative to `${GITHUB_WORKSPACE}`) | No       | `.`     | any relative path          |
+| checkout-fetch-depth        | Depth of commit history to fetch                                         | No       | 1       | `0` (full)/`1`/`2`/...     |
+| checkout-persist            | Whether to configure the token with the local git config                 | No       | true    | `true`/`false`             |
+| checkout-submodules         | Whether to fetch submodules                                              | No       | false   | `true`/`false`/`recursive` |
+| checkout-sparse             | Do a sparse checkout on given patterns                                   | No       | -       | path                       |
+| checkout-sparse-cone-mode   | Specifies whether to use cone-mode when doing a sparse checkout          | No       | true    |                            |
 
 **Java**
 
