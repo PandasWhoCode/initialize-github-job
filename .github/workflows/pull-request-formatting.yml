@@ -1,0 +1,43 @@
+name: "PR Formatting"
+
+on:
+  pull_request_target:
+    types:
+      - assigned
+      - unassigned
+      - labeled
+      - unlabeled
+      - opened
+      - reopened
+      - edited
+      - converted_to_draft
+      - ready_for_review
+      - review_requested
+      - review_request_removed
+      - locked
+      - unlocked
+      - synchronize
+
+defaults:
+  run:
+    shell: bash
+
+permissions:
+  statuses: write
+  contents: read
+  pull-requests: read
+
+jobs:
+  title-check:
+    name: Title Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        with:
+          egress-policy: audit
+
+      - name: Check PR Title
+        uses: step-security/action-semantic-pull-request@75d2dd5deafa3e9fccc1626ecd58d076ed1d2c79 # v6.1.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
