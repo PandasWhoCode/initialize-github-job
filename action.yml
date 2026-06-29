@@ -32,6 +32,17 @@ inputs:
     description: 'Whether to checkout submodules (true/false/recursive)'
     default: 'false'
     required: false
+  checkout-sparse:
+    description: >
+      Do a sparse checkout on given patterns.
+      Each pattern should be separated with new lines.
+    default: null
+    required: false
+  checkout-sparse-cone-mode:
+    description: >
+      Specifies whether to use cone-mode when doing a sparse checkout.
+    default: true
+    required: false
   setup-node:
     description: 'Whether to setup Node.js'
     required: false
@@ -259,6 +270,8 @@ runs:
         echo "Ref: ${{ inputs.checkout-ref }}"
         echo "Fetch Depth: ${{ inputs.checkout-fetch-depth }}"
         echo "Submodules: ${{ inputs.checkout-submodules }}"
+        echo "Sparse: ${{inputs.checkout-sparse }}"
+        echo "Sparse Cone Mode: ${{inputs.checkout-sparse-cone-mode }}"
         echo "::endgroup::"
 
     - name: Checkout Code
@@ -272,6 +285,8 @@ runs:
         token: ${{ inputs.checkout-token }}
         path: ${{ inputs.checkout-path }}
         persist-credentials: ${{ inputs.checkout-persist }}
+        sparse-checkout: ${{ inputs.checkout-sparse }}
+        sparse-checkout-cone-mode: ${{inputs.checkout-sparse-cone-mode }}
 
     - name: Set Up Java Parameters
       id: setup-java-params
