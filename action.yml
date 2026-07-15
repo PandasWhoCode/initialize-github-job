@@ -566,16 +566,29 @@ runs:
       id: setup-semver
       if: ${{ inputs.setup-semver == 'true' }}
       shell: bash
+      env:
+        # Pinned to fsaintjacques/semver-tool tag 3.4.0 (immutable commit).
+        # To bump: change both SEMVER_COMMIT and SEMVER_SHA256 together, e.g.
+        #   curl -sSL https://raw.githubusercontent.com/fsaintjacques/semver-tool/<commit>/src/semver | shasum -a 256
+        SEMVER_COMMIT: '837ad91179c4126e3b7ff73c35091d5ef561d9a3'
+        SEMVER_SHA256: '1ff4a97e4d1e389f6f034f7464ac4365f1be2d900e2dc2121e24a6dc239e8991'
       run: |
+        SEMVER_URL="https://raw.githubusercontent.com/fsaintjacques/semver-tool/${SEMVER_COMMIT}/src/semver"
+
         echo "::group::Download SemVer Binary"
-        sudo curl -sSfL https://raw.githubusercontent.com/fsaintjacques/semver-tool/master/src/semver \
+        curl -sSfL "${SEMVER_URL}" \
           -o /tmp/semver || { echo "Failed to download semver binary"; exit 1; }
         echo "::endgroup::"
-        
+
+        echo "::group::Verify SemVer Checksum"
+        echo "${SEMVER_SHA256}  /tmp/semver" | shasum -a 256 -c - \
+          || { echo "semver checksum verification failed"; exit 1; }
+        echo "::endgroup::"
+
         echo "::group::Change SemVer Binary Permissions"
         sudo install -m 755 /tmp/semver /usr/local/bin/semver
         echo "::endgroup::"
-        
+
         echo "::group::Show SemVer Binary Version Info"
         VERSION="$(/usr/local/bin/semver --version | tr -d '\n')"
         echo "semver version: ${VERSION}"
