@@ -65,6 +65,7 @@ jobs:
           setup-gomplate: true
           setup-jq: true
           setup-semver: true
+          setup-deterministic-zip: true
 
       - name: Verify Setup
         run: |
@@ -127,6 +128,9 @@ jobs:
           echo "::endgroup::"
           echo "::group::Verify SemVer Installation"
             semver --version
+          echo "::endgroup::"
+          echo "::group::Verify deterministic-zip Installation"
+            deterministic-zip --version
           echo "::endgroup::"
 
   test-egress-policy:
@@ -587,3 +591,25 @@ jobs:
             echo "Expected semver version ${OUTPUT_VERSION}, got: ${INSTALLED_VERSION}"
             exit 1
           fi
+
+  test-setup-deterministic-zip:
+    name: Test Setup deterministic-zip
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden Runner
+        id: harden-runner
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
+        with:
+          egress-policy: audit
+
+      - name: Checkout Repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Run Setup deterministic-zip Action
+        uses: ./
+        with:
+          setup-deterministic-zip: true
+
+      - name: Verify deterministic-zip Installation
+        run: |
+          deterministic-zip --version
