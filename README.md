@@ -163,6 +163,18 @@ Common steps for initializing a job for GitHub actions. This composite action co
 > https://raw.githubusercontent.com/fsaintjacques/semver-tool/master/src/semver
 > and installs it to `/usr/local/bin/semver`.
 
+**Deterministic Zip**
+
+| Input                   | Description                      | Required | Default |
+|-------------------------|----------------------------------|----------|---------|
+| setup-deterministic-zip | Whether to setup deterministic-zip | No     | false   |
+
+> [!NOTE]
+> `setup-deterministic-zip` installs [timo-reymann/deterministic-zip](https://github.com/timo-reymann/deterministic-zip) `1.2.0`
+> to `/usr/local/bin/deterministic-zip`. The release asset is verified against a hard-coded
+> per-platform SHA-256 (fail-closed) rather than the release's own `.sha256` sidecar, so an
+> upstream asset swap is rejected. Supports Linux/macOS on `amd64`/`arm64`.
+
 ### Outputs
 
 **Checkout Outputs**
@@ -264,6 +276,7 @@ Common steps for initializing a job for GitHub actions. This composite action co
     python-version: '3.12'
     python-cache: 'pip'
     setup-semver: 'true'
+    setup-deterministic-zip: 'true'
 ```
 
 **Blocking Egress Traffic**
