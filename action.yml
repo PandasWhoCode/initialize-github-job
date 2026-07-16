@@ -178,6 +178,10 @@ inputs:
     description: 'Whether to setup semver tool'
     required: false
     default: 'false'
+  setup-deterministic-zip:
+    description: 'Whether to setup deterministic-zip'
+    required: false
+    default: 'false'
 
 # expose outputs from the sub-actions
 outputs:
@@ -593,6 +597,64 @@ runs:
         VERSION="$(/usr/local/bin/semver --version | tr -d '\n')"
         echo "semver version: ${VERSION}"
         echo "version=${VERSION}" >> "${GITHUB_OUTPUT}"
+        echo "::endgroup::"
+
+    - name: Setup Deterministic Zip
+      id: setup-deterministic-zip
+      if: ${{ inputs.setup-deterministic-zip == 'true' }}
+      shell: bash
+      env:
+        # Pinned to timo-reymann/deterministic-zip 1.2.0 with a per-platform SHA-256.
+        # The release ships its own <asset>.sha256 sidecars, but those are NOT trusted here:
+        # a release-asset swap on the upstream repo would replace the sidecar alongside the
+        # binary. Hard-coding the expected digests makes any such tamper fail closed.
+        # To bump: change DZIP_VERSION and refresh every DZIP_SHA256_* below, e.g.
+        #   curl -sSL .../<version>/deterministic-zip_linux-amd64 | shasum -a 256
+        DZIP_VERSION: '1.2.0'
+        DZIP_SHA256_LINUX_AMD64: '56e9c2e28c9f535f100df1a94df122b62f4f2f66300abde2cf68d6a236ee5eaa'
+        DZIP_SHA256_LINUX_ARM64: 'fdb7a11ede185a6002c3d9f79489078ac12386297af2e4200e720fe12cc7f22e'
+        DZIP_SHA256_DARWIN_AMD64: 'ba34c4b871ac7a2bf38e51ad7310865badd7dd21d017efb6ed8eeb1c260bed38'
+        DZIP_SHA256_DARWIN_ARM64: '86677a58ceffc31419d5815f7e6fb7b096b78e20a9c73dbf28f999c4ad8bfc67'
+      run: |
+        case "${RUNNER_OS}" in
+          Linux) DZIP_OS="linux" ;;
+          macOS) DZIP_OS="darwin" ;;
+          *) echo "Unsupported runner OS for deterministic-zip setup: ${RUNNER_OS}"; exit 1 ;;
+        esac
+
+        case "${RUNNER_ARCH}" in
+          X64)   DZIP_ARCH="amd64" ;;
+          ARM64) DZIP_ARCH="arm64" ;;
+          *) echo "Unsupported runner arch for deterministic-zip setup: ${RUNNER_ARCH}"; exit 1 ;;
+        esac
+
+        case "${DZIP_OS}-${DZIP_ARCH}" in
+          linux-amd64)  EXPECTED_SHA="${DZIP_SHA256_LINUX_AMD64}" ;;
+          linux-arm64)  EXPECTED_SHA="${DZIP_SHA256_LINUX_ARM64}" ;;
+          darwin-amd64) EXPECTED_SHA="${DZIP_SHA256_DARWIN_AMD64}" ;;
+          darwin-arm64) EXPECTED_SHA="${DZIP_SHA256_DARWIN_ARM64}" ;;
+          *) echo "No pinned deterministic-zip checksum for ${DZIP_OS}-${DZIP_ARCH}"; exit 1 ;;
+        esac
+
+        DZIP_ASSET="deterministic-zip_${DZIP_OS}-${DZIP_ARCH}"
+        DZIP_URL="https://github.com/timo-reymann/deterministic-zip/releases/download/${DZIP_VERSION}/${DZIP_ASSET}"
+
+        echo "::group::Download deterministic-zip ${DZIP_VERSION}"
+        curl -sSfL "${DZIP_URL}" -o /tmp/deterministic-zip \
+          || { echo "Failed to download deterministic-zip binary"; exit 1; }
+        echo "::endgroup::"
+
+        echo "::group::Verify deterministic-zip Checksum"
+        echo "${EXPECTED_SHA}  /tmp/deterministic-zip" | shasum -a 256 -c - \
+          || { echo "deterministic-zip checksum verification failed"; exit 1; }
+        echo "::endgroup::"
+
+        echo "::group::Change deterministic-zip Binary Permissions"
+        sudo install -m 755 /tmp/deterministic-zip /usr/local/bin/deterministic-zip
+        echo "::endgroup::"
+
+        echo "::group::Show deterministic-zip Version Info"
+        deterministic-zip --version
         echo "::endgroup::"
 
 branding:
