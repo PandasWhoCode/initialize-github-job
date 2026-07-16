@@ -609,7 +609,7 @@ runs:
         # a release-asset swap on the upstream repo would replace the sidecar alongside the
         # binary. Hard-coding the expected digests makes any such tamper fail closed.
         # To bump: change DZIP_VERSION and refresh every DZIP_SHA256_* below, e.g.
-        #   curl -sSL .../<version>/deterministic-zip_linux-amd64 | shasum -a 256
+        #   curl -sSL https://github.com/timo-reymann/deterministic-zip/releases/download/<version>/deterministic-zip_linux-amd64 | shasum -a 256
         DZIP_VERSION: '1.2.0'
         DZIP_SHA256_LINUX_AMD64: '56e9c2e28c9f535f100df1a94df122b62f4f2f66300abde2cf68d6a236ee5eaa'
         DZIP_SHA256_LINUX_ARM64: 'fdb7a11ede185a6002c3d9f79489078ac12386297af2e4200e720fe12cc7f22e'
