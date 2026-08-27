@@ -66,6 +66,8 @@ jobs:
           setup-jq: true
           setup-semver: true
           setup-deterministic-zip: true
+          setup-kubectl: true
+          kubectl-version: 'v1.33.0'
 
       - name: Verify Setup
         run: |
@@ -131,6 +133,9 @@ jobs:
           echo "::endgroup::"
           echo "::group::Verify deterministic-zip Installation"
             deterministic-zip --version
+          echo "::endgroup::"
+          echo "::group::Verify kubectl Installation"
+            kubectl version --client
           echo "::endgroup::"
 
   test-egress-policy:
@@ -613,3 +618,55 @@ jobs:
       - name: Verify deterministic-zip Installation
         run: |
           deterministic-zip --version
+
+  test-setup-kubectl:
+    name: Test Setup kubectl
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden Runner
+        id: harden-runner
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
+        with:
+          egress-policy: audit
+
+      - name: Checkout Repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Run Setup kubectl Action
+        uses: ./
+        with:
+          setup-kubectl: true
+
+      - name: Verify kubectl Installation
+        run: |
+          kubectl version --client
+
+  test-setup-kubectl-custom-version:
+    name: Test Setup kubectl (custom version)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden Runner
+        id: harden-runner
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
+        with:
+          egress-policy: audit
+
+      - name: Checkout Repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Run Setup kubectl Action (non-default version)
+        uses: ./
+        with:
+          setup-kubectl: true
+          kubectl-version: 'v1.31.0'
+
+      - name: Verify kubectl Version Matches Input
+        env:
+          EXPECTED_VERSION: v1.31.0
+        run: |
+          ACTUAL="$(kubectl version --client)"
+          echo "kubectl reported: ${ACTUAL}"
+          if ! echo "${ACTUAL}" | grep -qF "${EXPECTED_VERSION}"; then
+            echo "Expected kubectl version ${EXPECTED_VERSION}, got: ${ACTUAL}"
+            exit 1
+          fi

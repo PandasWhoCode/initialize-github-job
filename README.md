@@ -7,7 +7,7 @@ Common steps for initializing a job for GitHub actions. This composite action co
 - Security hardening with Step Security's Harden Runner (configurable egress policy)
 - Repository checkout with configurable options
 - Multi-language support (Node.js, Java, Python, Go, Rust, Swift)
-- Build tool setup (Gradle, Task, gomplate, jq)
+- Build tool setup (Gradle, Task, gomplate, jq, kubectl)
 - Automatic caching for dependencies and build artifacts
 
 ## Usage
@@ -174,6 +174,13 @@ Common steps for initializing a job for GitHub actions. This composite action co
 > to `/usr/local/bin/deterministic-zip`. The release asset is verified against a hard-coded
 > per-platform SHA-256 (fail-closed) rather than the release's own `.sha256` sidecar, so an
 > upstream asset swap is rejected. Supports Linux/macOS on `amd64`/`arm64`.
+
+**kubectl**
+
+| Input           | Description               | Required | Default |
+|-----------------|---------------------------|----------|---------|
+| setup-kubectl   | Whether to setup kubectl  | No       | false   |
+| kubectl-version | kubectl version to use    | No       | v1.33.0 |
 
 ### Outputs
 

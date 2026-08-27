@@ -182,6 +182,14 @@ inputs:
     description: 'Whether to setup deterministic-zip'
     required: false
     default: 'false'
+  setup-kubectl:
+    description: 'Whether to setup kubectl'
+    required: false
+    default: 'false'
+  kubectl-version:
+    description: 'kubectl version to use (e.g. v1.33.0)'
+    required: false
+    default: 'v1.33.0'
 
 # expose outputs from the sub-actions
 outputs:
@@ -656,6 +664,22 @@ runs:
         echo "::group::Show deterministic-zip Version Info"
         deterministic-zip --version
         echo "::endgroup::"
+
+    - name: Set Up KubeCtl Parameters
+      id: setup-kubectl-params
+      if: ${{ inputs.setup-kubectl == 'true' }}
+      shell: bash
+      run: |
+        echo "::group::Setting up KubeCtl"
+        echo "Version: ${{ inputs.kubectl-version }}"
+        echo "::endgroup::"
+
+    - name: Install KubeCtl
+      id: setup-kubectl
+      if: ${{ inputs.setup-kubectl == 'true' }}
+      uses: azure/setup-kubectl@829323503d1be3d00ca8346e5391ca0b07a9ab0d # v5.1.0
+      with:
+        version: ${{ inputs.kubectl-version }}
 
 branding:
   icon: 'arrow-up-right'
