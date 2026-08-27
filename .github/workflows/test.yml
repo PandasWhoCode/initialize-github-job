@@ -68,6 +68,8 @@ jobs:
           setup-deterministic-zip: true
           setup-kubectl: true
           kubectl-version: 'v1.33.0'
+          setup-teleport: true
+          teleport-version: '18.4.0'
 
       - name: Verify Setup
         run: |
@@ -136,6 +138,9 @@ jobs:
           echo "::endgroup::"
           echo "::group::Verify kubectl Installation"
             kubectl version --client
+          echo "::endgroup::"
+          echo "::group::Verify Teleport Client Installation"
+            tsh version
           echo "::endgroup::"
 
   test-egress-policy:
@@ -668,5 +673,57 @@ jobs:
           echo "kubectl reported: ${ACTUAL}"
           if ! echo "${ACTUAL}" | grep -qF "${EXPECTED_VERSION}"; then
             echo "Expected kubectl version ${EXPECTED_VERSION}, got: ${ACTUAL}"
+            exit 1
+          fi
+
+  test-setup-teleport:
+    name: Test Setup Teleport Client
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden Runner
+        id: harden-runner
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
+        with:
+          egress-policy: audit
+
+      - name: Checkout Repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Run Setup Teleport Client Action
+        uses: ./
+        with:
+          setup-teleport: true
+
+      - name: Verify Teleport Client Installation
+        run: |
+          tsh version
+
+  test-setup-teleport-custom-version:
+    name: Test Setup Teleport Client (custom version)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden Runner
+        id: harden-runner
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
+        with:
+          egress-policy: audit
+
+      - name: Checkout Repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Run Setup Teleport Client Action (non-default version)
+        uses: ./
+        with:
+          setup-teleport: true
+          teleport-version: '17.5.2'
+
+      - name: Verify Teleport Client Version Matches Input
+        env:
+          EXPECTED_VERSION: 17.5.2
+        run: |
+          ACTUAL="$(tsh version)"
+          echo "tsh reported: ${ACTUAL}"
+          if ! echo "${ACTUAL}" | grep -qF "${EXPECTED_VERSION}"; then
+            echo "Expected Teleport version ${EXPECTED_VERSION}, got: ${ACTUAL}"
             exit 1
           fi

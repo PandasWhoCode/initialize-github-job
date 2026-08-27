@@ -7,7 +7,7 @@ Common steps for initializing a job for GitHub actions. This composite action co
 - Security hardening with Step Security's Harden Runner (configurable egress policy)
 - Repository checkout with configurable options
 - Multi-language support (Node.js, Java, Python, Go, Rust, Swift)
-- Build tool setup (Gradle, Task, gomplate, jq, kubectl)
+- Build tool setup (Gradle, Task, gomplate, jq, kubectl, Teleport)
 - Automatic caching for dependencies and build artifacts
 
 ## Usage
@@ -181,6 +181,13 @@ Common steps for initializing a job for GitHub actions. This composite action co
 |-----------------|---------------------------|----------|---------|
 | setup-kubectl   | Whether to setup kubectl  | No       | false   |
 | kubectl-version | kubectl version to use    | No       | v1.33.0 |
+
+**Teleport**
+
+| Input            | Description                       | Required | Default |
+|------------------|------------------------------------|----------|---------|
+| setup-teleport   | Whether to setup Teleport Client   | No       | false   |
+| teleport-version | Teleport Client version to use     | No       | 18.4.0  |
 
 ### Outputs
 
