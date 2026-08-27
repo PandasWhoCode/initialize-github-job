@@ -190,6 +190,14 @@ inputs:
     description: 'kubectl version to use (e.g. v1.33.0)'
     required: false
     default: 'v1.33.0'
+  setup-teleport:
+    description: 'Whether to setup Teleport Client'
+    required: false
+    default: 'false'
+  teleport-version:
+    description: 'Teleport Client version to use (e.g. 18.4.0)'
+    required: false
+    default: '18.4.0'
 
 # expose outputs from the sub-actions
 outputs:
@@ -680,6 +688,22 @@ runs:
       uses: azure/setup-kubectl@829323503d1be3d00ca8346e5391ca0b07a9ab0d # v5.1.0
       with:
         version: ${{ inputs.kubectl-version }}
+
+    - name: Set Up Teleport Client Parameters
+      id: setup-teleport-params
+      if: ${{ inputs.setup-teleport == 'true' }}
+      shell: bash
+      run: |
+        echo "::group::Setting up Teleport Client"
+        echo "Version: ${{ inputs.teleport-version }}"
+        echo "::endgroup::"
+
+    - name: Install Teleport Client
+      id: setup-teleport
+      if: ${{ inputs.setup-teleport == 'true' }}
+      uses: teleport-actions/setup@176c25dfcd19cd31a252f275d579822b243e7b9c # v1.0.6
+      with:
+        version: ${{ inputs.teleport-version }}
 
 branding:
   icon: 'arrow-up-right'
