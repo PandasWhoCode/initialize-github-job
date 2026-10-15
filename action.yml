@@ -10,6 +10,10 @@ inputs:
   checkout:
     description: 'Whether to checkout the repository'
     required: false
+  checkout-repository:
+    description: 'Repository name with owner (e.g. owner/repo) to checkout'
+    required: false
+    default: ${{ github.repository }}
   checkout-ref:
     description: 'The branch, tag or SHA to checkout'
     required: false
@@ -299,6 +303,7 @@ runs:
       uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       if: ${{ inputs.checkout == 'true' }}
       with:
+        repository: ${{ inputs.checkout-repository }}
         fetch-depth: ${{ inputs.checkout-fetch-depth }}
         submodules: ${{ inputs.checkout-submodules }}
         ref: ${{ inputs.checkout-ref }}

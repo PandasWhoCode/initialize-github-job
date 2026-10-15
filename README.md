@@ -36,6 +36,7 @@ Common steps for initializing a job for GitHub actions. This composite action co
 | Input                       | Description                                                              | Required | Default | Options                    |
 |-----------------------------|--------------------------------------------------------------------------|----------|---------|----------------------------|
 | checkout                    | Whether to checkout the repository                                       | No       | -       | `true`/`false`             |
+| checkout-repository         | Repository name with owner to checkout                                   | No       | `${{ github.repository }}` | any `owner/repo` |
 | checkout-ref                | The branch, tag or SHA to checkout                                       | No       | -       | any `branch`/`tag`/`SHA`   |
 | checkout-token              | Personal access token (PAT) used to fetch the repository                 | No       | -       | `Token` used for checkout  |
 | checkout-path               | Path to checkout the repository into (relative to `${GITHUB_WORKSPACE}`) | No       | `.`     | any relative path          |
@@ -291,6 +292,22 @@ Common steps for initializing a job for GitHub actions. This composite action co
     python-cache: 'pip'
     setup-semver: 'true'
     setup-deterministic-zip: 'true'
+```
+
+**Checking Out Another Repository**
+
+Set `checkout-repository` to check out a repository other than the one the workflow runs in. For a
+private repository, pass a `checkout-token` that has read access to it; the default `GITHUB_TOKEN`
+only has access to the current repository.
+
+```yaml
+- uses: PandasWhoCode/initialize-github-job@v1
+  with:
+    checkout: 'true'
+    checkout-repository: 'my-org/my-private-repo'
+    checkout-ref: 'v1.2.3'
+    checkout-token: '${{ secrets.MY_ORG_READ_TOKEN }}'
+    checkout-path: 'my-private-repo'
 ```
 
 **Blocking Egress Traffic**
